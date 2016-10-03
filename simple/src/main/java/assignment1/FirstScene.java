@@ -1,4 +1,4 @@
-package serie1;
+package assignment1;
 
 import jrtr.*;
 import jrtr.glrenderer.*;
