@@ -23,6 +23,7 @@ import jrtr.Shape;
  */
 public class SimpleKeyListener implements KeyListener
 {
+	
 	private Shape model;
 	private RenderPanel renderPanel;
 	
@@ -34,7 +35,7 @@ public class SimpleKeyListener implements KeyListener
 	
 	
 	public void keyPressed(KeyEvent e)
-	{
+	{/*
 		switch(e.getKeyChar())
 		{
 			case 'q': {
@@ -102,6 +103,7 @@ public class SimpleKeyListener implements KeyListener
 		
 		// Trigger redrawing
 		renderPanel.getCanvas().repaint();
+		*/
 	}
 	
 	public void keyReleased(KeyEvent e)
