@@ -4,11 +4,11 @@ import jrtr.*;
 import jrtr.glrenderer.*;
 import primitiveMeshes.Primitives;
 import transformations.Transformations;
+import userInput.SimpleKeyListener;
 import userInput.SimpleMouseListener;
 
 import javax.swing.*;
 
-import java.awt.event.*;
 import javax.vecmath.*;
 
 import java.util.Timer;
@@ -19,17 +19,17 @@ import java.util.TimerTask;
  * shows a rotating cube.
  */
 public class FirstScene
-{	
-	static RenderPanel renderPanel;
-	static RenderContext renderContext;
-	static Shader normalShader;
-	static Shader diffuseShader;
-	static Material material;
-	static SimpleSceneManager sceneManager;
-	static Shape cube, cylinder, rotor1, rotor2, steeredModel;
-	static Shape[] animatedModels;
-	static int currentAnimationExecutionsPerSecond, animationExecutionsPerSecond, fps;
-	static boolean paused;
+{
+	private static RenderPanel renderPanel;
+	private static RenderContext renderContext;
+	private static Shader normalShader;
+	private static Shader diffuseShader;
+	private static Material material;
+	private static SimpleSceneManager sceneManager;
+	private static Shape cube, cylinder, rotor1, rotor2, steeredModel;
+	private static Shape[] animatedModels;
+	private static int currentAnimationExecutionsPerSecond, animationExecutionsPerSecond, fps;
+	private static boolean paused;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -161,139 +161,127 @@ public class FirstScene
 			//Transformations.translate(cube, 0, 0.5f);
 		}
 	}
-	/**
-	 * A key listener for the main window. Use this to process key events.
-	 * Currently this provides the following controls:
-	 * 'w': move the steeredModel up
-	 * 'a': move the steeredModel left
-	 * 's': move the steeredModel down
-	 * 'd': move the steeredModel right
-	 * 'q': rotate the steeredModel around the z-axis (roll), leftwards
-	 * 'e': rotate the steeredModel around the z-axis (roll), rightwards
-	 * 'y': rotate the steeredModel around the x-axis (tilt), upwards
-	 * 'c': rotate the steeredModel around the x-axis (tilt), downwards
-	 * 'p': play or pause animation
-	 * '+': accelerate animation
-	 * '-': slow down animation
-	 * 'x': default shader
-	 * 'n': shader using surface normals
-	 * 'm': use a material for shading
-	 */
-	public static class SimpleKeyListener implements KeyListener
+	
+	public static void togglePaused()
 	{
-		public void keyPressed(KeyEvent e)
+		paused = !paused;
+	}
+	
+	public static void increaseAnimationSpeed()
+	{
+		currentAnimationExecutionsPerSecond = currentAnimationExecutionsPerSecond + 1 < fps ? currentAnimationExecutionsPerSecond + 1 : fps;
+	}
+	
+	public static void decreaseAnimationSpeed()
+	{
+		currentAnimationExecutionsPerSecond = currentAnimationExecutionsPerSecond - 1 > 1 ? currentAnimationExecutionsPerSecond - 1 : 1;
+	}
+	
+	public static void setNormalShader()
+	{
+		// Remove material from shape, and set "normal" shader
+		steeredModel.setMaterial(null);
+		renderContext.useShader(normalShader);
+	}
+	
+	public static void setDefaultShader()
+	{
+		// Remove material from shape, and set "default" shader
+		steeredModel.setMaterial(null);
+		renderContext.useDefaultShader();
+	}
+	
+	public static void setMaterial()
+	{
+		// Set a material for more complex shading of the shape
+		if(steeredModel.getMaterial() == null) {
+			steeredModel.setMaterial(material);
+		} else
 		{
-			float distance = 0.5f;
-			float angleInDegrees = 10;
-			
-			switch(e.getKeyChar())
-			{
-				case 'w': {
-					Transformations.translate(steeredModel, 4, distance);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.translateGlobal(animatedModels[i], new Vector3f(cube.getTransformation().m01, cube.getTransformation().m11, cube.getTransformation().m21), distance);
-					}
-					break;
-				}
-				case 'a': {
-					Transformations.translate(steeredModel, 2, distance);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.translateGlobal(animatedModels[i], new Vector3f(-cube.getTransformation().m00, -cube.getTransformation().m10, -cube.getTransformation().m20), distance);
-					}
-					break;
-				}
-				case 's': {
-					Transformations.translate(steeredModel, 5, distance);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.translateGlobal(animatedModels[i], new Vector3f(-cube.getTransformation().m01, -cube.getTransformation().m11, -cube.getTransformation().m21), distance);
-					}
-					break;
-				}
-				case 'd': {
-					Transformations.translate(steeredModel, 3, distance);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.translateGlobal(animatedModels[i], new Vector3f(cube.getTransformation().m00, cube.getTransformation().m10, cube.getTransformation().m20), distance);
-					}
-					break;
-				}
-				case 'q': {
-					Transformations.rotateRoll(steeredModel, angleInDegrees);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.rotateRelativeRoll(animatedModels[i], angleInDegrees, cube);
-					}
-					break;
-				}case 'e': {
-					Transformations.rotateRoll(steeredModel, -angleInDegrees);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.rotateRelativeRoll(animatedModels[i], -angleInDegrees, cube);
-					}
-					break;
-				}
-				case 'y': {
-					Transformations.rotateTilt(steeredModel, angleInDegrees);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.rotateRelativeTilt(animatedModels[i], angleInDegrees, cube);
-					}
-					break;
-				}case 'c': {
-					Transformations.rotateTilt(steeredModel, -angleInDegrees);
-					for(int i=0; i<animatedModels.length; i++){
-						Transformations.rotateRelativeTilt(animatedModels[i], -angleInDegrees, cube);
-					}
-					break;
-				}
-				case 'p': {
-					// play or pause animation
-					paused = !paused;
-					break;
-				}
-				case '+': {
-					// Accelerate animation by 10%
-					currentAnimationExecutionsPerSecond = currentAnimationExecutionsPerSecond + 1 < fps ? currentAnimationExecutionsPerSecond + 1 : fps;
-					break;
-				}
-				case '-': {
-					// Slow down animation by 10%
-					currentAnimationExecutionsPerSecond = currentAnimationExecutionsPerSecond - 1 > 1 ? currentAnimationExecutionsPerSecond - 1 : 1;
-					break;
-				}
-				case 'n': {
-					// Remove material from shape, and set "normal" shader
-					steeredModel.setMaterial(null);
-					renderContext.useShader(normalShader);
-					break;
-				}
-				case 'x': {
-					// Remove material from shape, and set "default" shader
-					steeredModel.setMaterial(null);
-					renderContext.useDefaultShader();
-					break;
-				}
-				case 'm': {
-					// Set a material for more complex shading of the shape
-					if(steeredModel.getMaterial() == null) {
-						steeredModel.setMaterial(material);
-					} else
-					{
-						steeredModel.setMaterial(null);
-						renderContext.useDefaultShader();
-					}
-					break;
-				}
-			}
-			
-			// Trigger redrawing
-			renderPanel.getCanvas().repaint();
+			steeredModel.setMaterial(null);
+			renderContext.useDefaultShader();
 		}
-		
-		public void keyReleased(KeyEvent e)
-		{
+	}
+	
+	public static void repaint()
+	{
+		renderPanel.getCanvas().repaint();
+	}
+	
+	public static void applyDownTranslation(float distance)
+	{
+		Transformations.translate(steeredModel, 5, distance);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.translateGlobal(animatedModels[i], new Vector3f(
+					-cube.getTransformation().m01,
+					-cube.getTransformation().m11,
+					-cube.getTransformation().m21), distance);
 		}
-
-		public void keyTyped(KeyEvent e)
-        {
-        }
-
+	}
+	
+	public static void applyUpTranslation(float distance)
+	{
+		Transformations.translate(steeredModel, 4, distance);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.translateGlobal(animatedModels[i], new Vector3f(
+					cube.getTransformation().m01,
+					cube.getTransformation().m11,
+					cube.getTransformation().m21), distance);
+		}
+	}
+	
+	public static void applyLeftTranslation(float distance)
+	{
+		Transformations.translate(steeredModel, 2, distance);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.translateGlobal(animatedModels[i], new Vector3f(
+					-cube.getTransformation().m00,
+					-cube.getTransformation().m10,
+					-cube.getTransformation().m20), distance);
+		}
+	}
+	
+	public static void applyRightTranslation(float distance)
+	{
+		Transformations.translate(steeredModel, 3, distance);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.translateGlobal(animatedModels[i], new Vector3f(
+					cube.getTransformation().m00,
+					cube.getTransformation().m10,
+					cube.getTransformation().m20), distance);
+		}
+	}
+	
+	public static void applyLeftRoll(float angleInDegrees)
+	{
+		Transformations.rotateRoll(steeredModel, angleInDegrees);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.rotateRelativeRoll(animatedModels[i], angleInDegrees, cube);
+		}
+	}
+	
+	public static void applyRightRoll(float angleInDegrees)
+	{
+		Transformations.rotateRoll(steeredModel, -angleInDegrees);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.rotateRelativeRoll(animatedModels[i], -angleInDegrees, cube);
+		}
+	}
+	
+	public static void applyUpTilt(float angleInDegrees)
+	{
+		Transformations.rotateTilt(steeredModel, angleInDegrees);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.rotateRelativeTilt(animatedModels[i], angleInDegrees, cube);
+		}
+	}
+	
+	public static void applyDownTilt(float angleInDegrees)
+	{
+		Transformations.rotateTilt(steeredModel, -angleInDegrees);
+		for(int i=0; i<animatedModels.length; i++){
+			Transformations.rotateRelativeTilt(animatedModels[i], -angleInDegrees, cube);
+		}
 	}
 	
 	/**
