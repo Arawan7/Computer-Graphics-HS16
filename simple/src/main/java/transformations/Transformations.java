@@ -1,12 +1,52 @@
 package transformations;
 
+import java.awt.Point;
+
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
+import jrtr.Camera;
 import jrtr.Shape;
 
+/**
+ * A class that provides affine transformations in 3D space.
+ * @author Arawan//simon
+ *
+ */
 public class Transformations {
+	
+	/**
+	 * Rotates the given camera relatively according to the rotation of moving from-point to to-point.
+	 * @param model The camera to rotate.
+	 * @param from The from-mouse-position.
+	 * @param to The to-mouse-position.
+	 * @param width The screen's width.
+	 * @param height The screen's height.
+	 */
+	public static void virtualTrackball(Camera camera, Point from, Point to, int width, int height)
+	{
+		Vector4f pivot = new Vector4f();
+		camera.getCameraMatrix().getColumn(3, pivot);
+		
+		Matrix4f rotation = rotationFromTo( projectPointToVector3f(from, width, height), projectPointToVector3f(to, width, height) );
+		
+		Matrix4f translationToOrigin = new Matrix4f();
+		translationToOrigin.setIdentity();
+		translationToOrigin.setColumn(3, new Vector4f(-pivot.x,-pivot.y,-pivot.z,1));
+		
+		Matrix4f translationToCamera = (Matrix4f)translationToOrigin.clone();
+		translationToCamera.invert();
+		
+		// construct ((((T^-1)R)T)(transformation))
+		translationToCamera.mul(rotation);
+		translationToCamera.mul(translationToOrigin);
+		translationToCamera.mul(camera.getCameraMatrix());
+		
+		// apply result
+		camera.setCameraMatrix(translationToCamera);
+	}
+	
 	/**
 	 * Scales the model by the scaling factors.
 	 * @param model The model to apply the scaling.
@@ -201,7 +241,7 @@ public class Transformations {
 	}
 	
 	/**
-	 * Rotates the model around given pivot.
+	 * Rotates the model around given pivot by given rotation.
 	 * @param model The model to rotate.
 	 * @param pivot The pivot to rotate about.
 	 * @param rotation The rotation to apply.
@@ -222,5 +262,47 @@ public class Transformations {
 		
 		// apply result
 		model.setTransformation(translationToModel);
+	}
+	
+	/**
+	 * Calculates the rotation matrix that describes the rotation of moving vector from to vector to.
+	 * @param from
+	 * @param to
+	 * @return the rotation matrix of rotating vector from to vector to.
+	 */
+	private static Matrix4f rotationFromTo(Vector3f from, Vector3f to)
+	{
+		Vector3f axis = new Vector3f();
+		axis.cross(from, to);
+		float angleBetweenVectors = -from.angle(to); // negate because we're moving the camera
+		Vector4f axis4f = new Vector4f(new float[]{axis.x,axis.y,axis.z,0});
+		return getRotationAboutAxis(axis4f, angleBetweenVectors);
+
+	}
+	
+	/**
+	 * Projects the given mousePos to 3D world space.
+	 * @param mousePos
+	 * @param width The with of the screen.
+	 * @param height The height of the screen
+	 * @return the projected point as a Vector3f.
+	 */
+	private static Vector3f projectPointToVector3f(Point mousePos, int width, int height)
+	{
+		// Scale bounds to [0,0] - [2,2]
+		double x = mousePos.x / (width/2);
+		double y = mousePos.y / (height/2);
+		
+		// Translate 0,0 to the center
+		x = x - 1;
+		// Flip so +Y is up instead of down
+		y = 1 - y;
+		
+		double z2 = 1 - x * x - y * y;
+		double z = z2 > 0 ? Math.sqrt(z2) : 0;
+		Vector3f projectedPoint = new Vector3f((float)x, (float)y, (float)z);
+		projectedPoint.normalize();
+		
+		return projectedPoint;
 	}
 }

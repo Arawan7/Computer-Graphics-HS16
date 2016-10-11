@@ -61,6 +61,9 @@ import assignment1.FirstScene;
 				}case 'c': {
 					FirstScene.applyDownTilt(ANGLE_IN_DEGREES);
 					break;
+				}case 'f': {
+					FirstScene.shoot();
+					break;
 				}
 				case 'p': {
 					// play or pause animation

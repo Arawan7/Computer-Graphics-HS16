@@ -5,12 +5,13 @@ import jrtr.glrenderer.*;
 import primitiveMeshes.Primitives;
 import transformations.Transformations;
 import userInput.SimpleKeyListener;
-import userInput.SimpleMouseListener;
+import userInput.SimpleMouseMotionListener;
 
 import javax.swing.*;
 
 import javax.vecmath.*;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,6 +29,7 @@ public class FirstScene
 	private static SimpleSceneManager sceneManager;
 	private static Shape cube, cylinder, rotor1, rotor2, steeredModel;
 	private static Shape[] animatedModels;
+	private static ArrayList<Shape> shoots = new ArrayList<Shape>();
 	private static int currentAnimationExecutionsPerSecond, animationExecutionsPerSecond, fps;
 	private static boolean paused;
 
@@ -48,10 +50,10 @@ public class FirstScene
 			renderContext = r;
 			
 			// create the objects
-			cube = new Shape(Primitives.getCube(r));
-			cylinder = new Shape( Primitives.getCylinder(50, 3, 1, r) );
-			rotor1 = new Shape( Primitives.getTorus(30, 30, 0.7f, 0.3f, r) );
-			rotor2 = new Shape( Primitives.getTorus(30, 30, 0.7f, 0.3f, r) );
+			cube = Primitives.makeCube(r);
+			cylinder = Primitives.makeCylinder(50, 3, 1, r);
+			rotor1 = Primitives.makeTorus(30, 30, 0.7f, 0.3f, r);
+			rotor2 = Primitives.makeTorus(30, 30, 0.7f, 0.3f, r);
 			
 			animatedModels = new Shape[3];
 			animatedModels[0] = rotor1;
@@ -159,6 +161,13 @@ public class FirstScene
 			}
 			//Transformations.rotatePan(cube, 10);
 			//Transformations.translate(cube, 0, 0.5f);
+			
+			for(int i=0; i<shoots.size(); i++)
+			{
+				Transformations.translate(shoots.get(i), 5, 0.3f);
+				Transformations.rotatePan(shoots.get(i), -20);
+			}
+			
 		}
 	}
 	
@@ -284,6 +293,20 @@ public class FirstScene
 		}
 	}
 	
+	public static void shoot()
+	{
+		Shape shot = Primitives.makeCylinder(50, 1, 0.4f, renderContext);
+		sceneManager.addShape(shot);
+		Matrix3f b = new Matrix3f();
+		cube.getTransformation().getRotationScale(b);;
+		shot.getTransformation().setRotation(b);
+		Vector4f h = new Vector4f();
+		cube.getTransformation().getColumn(3, h);
+		shot.getTransformation().setTranslation(new Vector3f(h.x, h.y, h.z));
+		Transformations.rotateTilt(shot, 90);
+		shoots.add(shot);
+	}
+	
 	/**
 	 * The main function opens a 3D rendering window, implemented by the class
 	 * {@link SimpleRenderPanel}. {@link SimpleRenderPanel} is then called backed 
@@ -302,8 +325,7 @@ public class FirstScene
 		jframe.setLocationRelativeTo(null); // center of screen
 		jframe.getContentPane().add(renderPanel.getCanvas());// put the canvas into a JFrame window
 
-		// Add a mouse and key listener
-	    renderPanel.getCanvas().addMouseListener(new SimpleMouseListener());
+		// Add a key listener
 	    renderPanel.getCanvas().addKeyListener(new SimpleKeyListener());
 		renderPanel.getCanvas().setFocusable(true);   	    	    
 	    
