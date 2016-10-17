@@ -5,8 +5,6 @@ import jrtr.glrenderer.*;
 import primitiveMeshes.Primitives;
 import userInput.SimpleMouseMotionListener;
 
-import java.io.IOException;
-
 import javax.swing.*;
 
 import javax.vecmath.*;
@@ -38,14 +36,15 @@ public class VirtualTrackballScene {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}*/
-			steeredModel = Primitives.makeCube(r);
+			steeredModel = Primitives.makeHouse(r);
 			
 			sceneManager.getCamera().setUpVector(new Vector3f(0,1,0));
 			sceneManager.getCamera().setLookAtPoint(new Vector3f(-5,0,0));
-			sceneManager.getCamera().setCenterOfProjection(new Vector3f(-10,40,40));
+			sceneManager.getCamera().setCenterOfProjection(new Vector3f(40,0,0));
+//			sceneManager.getCamera().setCenterOfProjection(new Vector3f(-1,30,30));
 			
+//			Transformations.translateGlobal(steeredModel, new Vector3f(-1, -0.3f, 0), 10);
 			sceneManager.addShape(steeredModel);
-			
 
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);

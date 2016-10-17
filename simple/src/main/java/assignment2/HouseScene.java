@@ -37,11 +37,11 @@ public class HouseScene {
 			sceneManager.addShape(house);
 			sceneManager.getCamera().setUpVector(new Vector3f(0,1,0));
 			
-//			sceneManager.getCamera().setLookAtPoint(new Vector3f(0,0,0));
-//			sceneManager.getCamera().setCenterOfProjection(new Vector3f(0,0,40));
+			sceneManager.getCamera().setLookAtPoint(new Vector3f(0,0,0));
+			sceneManager.getCamera().setCenterOfProjection(new Vector3f(0,0,40));
 			
-			sceneManager.getCamera().setLookAtPoint(new Vector3f(-5,0,0));
-			sceneManager.getCamera().setCenterOfProjection(new Vector3f(-10,40,40));
+//			sceneManager.getCamera().setLookAtPoint(new Vector3f(-5,0,0));
+//			sceneManager.getCamera().setCenterOfProjection(new Vector3f(-10,40,40));
 			
 
 			// Add the scene to the renderer

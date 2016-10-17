@@ -32,15 +32,10 @@ public class SimpleMouseMotionListener implements MouseMotionListener, MouseList
 	public void mousePressed(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON1 && isInside)
 		{
-			previousPos = e.getLocationOnScreen();
+			previousPos = e.getPoint();
 		}
 	}
 	public void mouseReleased(MouseEvent e) {
-		/*if(e.getButton() == MouseEvent.BUTTON1)
-		{
-			Transformations.virtualTrackball(camera, previousPos, e.getLocationOnScreen(), screenWidth, screenHeight);
-			VirtualTrackballScene.repaint();
-		}*/
 	}
 	
 	@Override
@@ -58,7 +53,7 @@ public class SimpleMouseMotionListener implements MouseMotionListener, MouseList
 	public void mouseDragged(MouseEvent e) {
 		if(isInside)
 		{
-			Transformations.virtualTrackball(camera, previousPos, e.getLocationOnScreen(), screenWidth, screenHeight);
+			Transformations.virtualTrackball(camera, previousPos, e.getPoint(), screenWidth, screenHeight);
 			VirtualTrackballScene.repaint();
 			previousPos = e.getLocationOnScreen();
 		}

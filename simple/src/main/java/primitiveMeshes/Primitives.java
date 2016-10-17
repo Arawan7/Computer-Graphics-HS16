@@ -1,10 +1,223 @@
 package primitiveMeshes;
 
+import java.awt.Color;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Vector3f;
+
 import jrtr.RenderContext;
 import jrtr.Shape;
 import jrtr.VertexData;
 
 public class Primitives {
+	
+	static Random rnd = new Random(System.currentTimeMillis());
+	
+	/**
+	 * Creates a fractal landscape using Squares & Diamonds algorithm.
+	 * @param n The exponent of 2 which gives the length of the fractal landscape when increased by one. Has to be greater than zero.
+	 * @param maxNoise The maximum random noise that is applied.
+	 * @param renderContext the render context to create the VertexData.
+	 * @return The shape of a fractal landscape.
+	 */
+	public static final Shape makeFractalLandscape(int n, float maxNoise, RenderContext renderContext)
+	{
+		assert 0 < n;
+		
+		int size = (int)Math.pow(2, n) + 1;
+		float[][] heightValues = new float[size][size];
+		computeHeightValues(heightValues, size, maxNoise);
+		float maxHight = 0.1f;
+		
+		for(int x=0; x<size; x++)
+			for(int y=0; y<size; y++)
+			{
+				maxHight = Float.max(maxHight, heightValues[x][y]);
+			}
+		
+		int numberOfVertices = size*size;
+		float[] v = new float[3*numberOfVertices]; // xyz per vertex
+		
+		for(int x=0; x<size; x++)
+			for(int y=0; y<size; y++)
+			{
+				v[3*(x*size + y)] = x-(int)size/2;
+				v[3*(x*size + y)+1] = y-(int)size/2;
+				v[3*(x*size + y)+2] = heightValues[x][y];
+			}
+		
+		// The vertex colors
+		float c[] = new float[3*numberOfVertices]; // rgb per vertex
+		for(int x=0; x<size; x++)
+			for(int y=0; y<size; y++)
+			{
+				Color color = getLandscapeColor(heightValues[x][y], maxHight);
+				float r = color.getRed();
+				float g = color.getGreen();
+				float b = color.getBlue();
+				
+				c[3*(x*size + y)] = r/255;
+				c[3*(x*size + y)+1] = g/255;
+				c[3*(x*size + y)+2] = b/255;
+			}
+		
+		// The triangles
+		int indices[] = new int[3*2*(int)Math.pow(4, n)]; // three vertex indices for each triangle, two triangles per square, 4^n squares
+		for(int x=0; x<size-1; x++)
+			for(int y=0; y<size-1; y++)
+			{
+				indices[6*(x*(size-1) + y)] = x*size + y;
+				indices[6*(x*(size-1) + y)+1] = (x+1)*size + y;
+				indices[6*(x*(size-1) + y)+2] = (x+1)*size + y+1;
+				
+				indices[6*(x*(size-1) + y)+3] = (x+1)*size + y+1;
+				indices[6*(x*(size-1) + y)+4] = x*size + y+1;
+				indices[6*(x*(size-1) + y)+5] = x*size + y;
+			}
+		
+		float[] normals = new float[3*numberOfVertices];
+		for(int x=0; x<size; x++)
+			for(int y=0; y<size; y++)
+			{
+				int indexOfVertex = 3*(x*size + y);
+				int indexOfNextRowVertex = x==(size-1) ? 3*((x-1)*size + y) : 3*((x+1)*size + y);
+				int indexOfNextColumnVertex = y==(size-1) ? 3*(x*size + y-1) : 3*(x*size + y+1);
+				
+				Vector3f vertex = new Vector3f(v[indexOfVertex],v[indexOfVertex+1],v[indexOfVertex+2]);
+				Vector3f rowVertex = new Vector3f(v[indexOfNextRowVertex],v[indexOfNextRowVertex+1],v[indexOfNextRowVertex+2]);
+				Vector3f columnVertex = new Vector3f(v[indexOfNextColumnVertex],v[indexOfNextColumnVertex+1],v[indexOfNextColumnVertex+2]);
+				Vector3f crossP = new Vector3f();
+				rowVertex.sub(vertex);
+				columnVertex.sub(vertex);
+				if(x == size-1 || y == size-1)
+					crossP.cross(columnVertex,rowVertex);
+				else
+					crossP.cross(rowVertex,columnVertex);
+				
+				normals[3*(x*size + y)] = crossP.x;
+				normals[3*(x*size + y)+1] = crossP.y;
+				normals[3*(x*size + y)+2] = crossP.z;
+			}
+		
+		VertexData vertexData = renderContext.makeVertexData(numberOfVertices);
+		vertexData.addElement(c, VertexData.Semantic.COLOR, 3);
+		vertexData.addElement(v, VertexData.Semantic.POSITION, 3);
+		vertexData.addElement(normals, VertexData.Semantic.NORMAL, 3);
+		vertexData.addIndices(indices);
+		
+		Shape fractalLandscape = new Shape(vertexData);
+		return fractalLandscape;
+	}
+	
+	private static Color getLandscapeColor(float height, float maxHight)
+	{
+		assert maxHight > 0f;
+		
+		Color sand = new Color(237, 201, 175);
+		Color leaf = new Color(30, 147, 45);
+		Color mountain = new Color(150, 141, 153);
+		Color snow = new Color(255,255,255);
+		
+		float relativeHeight = height / maxHight; // between 0 and 1
+		
+		if(relativeHeight < 0.65f)
+			return sand;
+		else if(relativeHeight < 0.75f)
+			return leaf;
+		else if(relativeHeight < 0.9f)
+			return mountain;
+		else
+			return snow;
+	}
+	
+	/**
+	 * Applies Squares & Diamonds algorithm recursively to heightValues.
+	 * @param heightValues The 2D array to fill with height values. Dimensions have to be 2^currentSize + 1.
+	 * @param size The exponent of 2 which gives the heightValues.length when increased by one.
+	 * @param noise The maximum random noise that is applied.
+	 */
+	private static void computeHeightValues(final float[][] heightValues, int size, float noise) {
+		
+		int arrayPosOfHalfSize = size/2;
+		int currentSize = size;
+		float currentNoise = noise;
+		
+		// initialization
+		heightValues[0][0] = (float) Math.random()*noise;
+		heightValues[size-1][0] = (float) Math.random()*noise;
+		heightValues[0][size-1] = (float) Math.random()*noise;
+		heightValues[size-1][size-1] = (float) Math.random()*noise;
+		
+		ArrayList<Point> iterationPos = new ArrayList<Point>();
+		ArrayList<Point> newIterationPos = new ArrayList<Point>();
+		iterationPos.add(new Point(0,0));
+		
+		while(currentSize > 2){//arrayPosOfHalfSize > 1){
+			for(Point point : iterationPos){
+				applySquare(heightValues, point.x, point.y, arrayPosOfHalfSize, currentSize, currentNoise);
+			}
+			for(Point point : iterationPos){
+				applyDiamond(heightValues, point.x, point.y, arrayPosOfHalfSize, currentSize, currentNoise);
+				newIterationPos.add(new Point(point.x, point.y+arrayPosOfHalfSize));
+				newIterationPos.add(new Point(point.x+arrayPosOfHalfSize, point.y));
+				newIterationPos.add(new Point(point.x+arrayPosOfHalfSize, point.y+arrayPosOfHalfSize));
+			}
+			currentSize = arrayPosOfHalfSize+1;
+			arrayPosOfHalfSize = currentSize/2;
+			iterationPos.addAll(newIterationPos);
+			newIterationPos.clear();
+			currentNoise *= 0.65f;
+		}
+	}
+	
+	private static void applySquare(final float[][] heightValues, int originX, int originY, int arrayPosOfHalfSize, int size, float noise){
+		heightValues[originX+arrayPosOfHalfSize][originY+arrayPosOfHalfSize] = getMeanWithNoise(new float[]{heightValues[originX][originY],
+				heightValues[originX+size-1][originY],
+				heightValues[originX][originY+size-1],
+				heightValues[originX+size-1][originY+size-1]},
+				noise);
+	}
+	
+	private static void applyDiamond(final float[][] heightValues, int originX, int originY, int arrayPosOfHalfSize, int size, float noise){
+		heightValues[originX+arrayPosOfHalfSize][originY] = getMeanWithNoise(new float[]{heightValues[originX][originY],
+				heightValues[originX+size-1][originY],
+				heightValues[originX+arrayPosOfHalfSize][originY+arrayPosOfHalfSize],
+				(originY-arrayPosOfHalfSize) < 0 ? Float.NaN : heightValues[originX+arrayPosOfHalfSize][originY-arrayPosOfHalfSize]},
+				noise);
+		
+		heightValues[originX][originY+arrayPosOfHalfSize] = getMeanWithNoise(new float[]{heightValues[originX][originY],
+				heightValues[originX][originY+size-1],
+				heightValues[originX+arrayPosOfHalfSize][originY+arrayPosOfHalfSize],
+				(originX-arrayPosOfHalfSize) < 0 ? Float.NaN : heightValues[originX-arrayPosOfHalfSize][originY+arrayPosOfHalfSize]},
+				noise);
+		
+		heightValues[originX+arrayPosOfHalfSize][originY+size-1] = getMeanWithNoise(new float[]{heightValues[originX][originY+size-1],
+				heightValues[originX+size-1][originY+size-1],
+				heightValues[originX+arrayPosOfHalfSize][originY+arrayPosOfHalfSize],
+				(originY+size-1+arrayPosOfHalfSize) >= heightValues.length ? Float.NaN : heightValues[originX+arrayPosOfHalfSize][originY+size-1+arrayPosOfHalfSize]},
+				noise);
+		
+		heightValues[originX+size-1][originY+arrayPosOfHalfSize] = getMeanWithNoise(new float[]{heightValues[originX+size-1][originY],
+				heightValues[originX+size-1][originY+size-1],
+				heightValues[originX+arrayPosOfHalfSize][originY+arrayPosOfHalfSize],
+				(originX+size-1+arrayPosOfHalfSize) >= heightValues.length ? Float.NaN : heightValues[originX+size-1+arrayPosOfHalfSize][originY+arrayPosOfHalfSize]},
+				noise);
+	}
+	
+	private static float getMeanWithNoise(float[] heights, float maxNoise)
+	{
+		float mean = 0f;
+		int numberOfFloats=0;
+		
+		for(int i=0; i<heights.length; i++){
+			mean += Float.isNaN(heights[i]) ? 0f : heights[i];
+			numberOfFloats += Float.isNaN(heights[i]) ? 0 : 1;
+		}
+		return mean/numberOfFloats + rnd.nextFloat()*maxNoise;
+	}
+
 	/**
 	 * Generates a triangle mesh for a torus.
 	 * @param innerResolution How many segments are used to construct the inner circle, must be greater or equals to 3.

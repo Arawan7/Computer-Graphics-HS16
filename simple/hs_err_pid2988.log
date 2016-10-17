@@ -1,0 +1,189 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f25550693fa, pid=2988, tid=139796756297472
+#
+# JRE version: OpenJDK Runtime Environment (8.0_91-b14) (build 1.8.0_91-8u91-b14-3ubuntu1~16.04.1-b14)
+# Java VM: OpenJDK 64-Bit Server VM (25.91-b14 mixed mode linux-amd64 compressed oops)
+# Problematic frame:
+# v  ~BufferBlob::jni_fast_GetLongField
+#
+# Failed to write core dump. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007f25643d5800):  JavaThread "AWT-XAWT" daemon [_thread_in_native, id=3021, stack(0x00007f24f7eff000,0x00007f24f8000000)]
+
+siginfo: si_signo: 11 (SIGSEGV), si_code: 1 (SEGV_MAPERR), si_addr: 0x0000000000000000
+
+Registers:
+RAX=0x00007f256cdc4e80, RBX=0x00007f25643d59e0, RCX=0x0000000000000000, RDX=0x0000000000000042
+RSP=0x00007f24f7ffe818, RBP=0x00007f24f7ffe840, RSI=0x0000000000000000, RDI=0x00007f25643d59e0
+R8 =0x00000000000001f4, R9 =0x0000000000000000, R10=0x0000000000000014, R11=0x00007f256c82f920
+R12=0x00007f24ec008d40, R13=0x0000000000000000, R14=0x00007f2536bfab00, R15=0x00007f25643d5800
+RIP=0x00007f25550693fa, EFLAGS=0x0000000000010246, CSGSFS=0x0000000000000033, ERR=0x0000000000000004
+  TRAPNO=0x000000000000000e
+
+Top of Stack: (sp=0x00007f24f7ffe818)
+0x00007f24f7ffe818:   00007f25369d7f34 00007f2568dbe010
+0x00007f24f7ffe828:   00007f24ec008d40 00007f2568dbe010
+0x00007f24f7ffe838:   00007f24f7ffe928 0000000000000000
+0x00007f24f7ffe848:   00007f25364ba3c0 00007f2568dbe010
+0x00007f24f7ffe858:   00007f24f7ffe880 0000000000000000
+0x00007f24f7ffe868:   00007f25364b1f93 00007f2568dbe010
+0x00007f24f7ffe878:   00007f25369cfcaf 00007f24f7ffe8f0
+0x00007f24f7ffe888:   00007f2555017754 00007f24f7ffe970
+0x00007f24f7ffe898:   00007f25552dfb8c 00007f24f7ffe970
+0x00007f24f7ffe8a8:   00007f25552e2ae4 00007f24f7ffe8b0
+0x00007f24f7ffe8b8:   0000000000000000 00007f24f7ffe928
+0x00007f24f7ffe8c8:   00007f2568dc26a0 0000000000000000
+0x00007f24f7ffe8d8:   00007f2568dbe010 0000000000000000
+0x00007f24f7ffe8e8:   00007f24f7ffe910 00007f24f7ffe970
+0x00007f24f7ffe8f8:   00007f25550077d0 00000000d89ffa40
+0x00007f24f7ffe908:   00007f2555011260 0000000000000000
+0x00007f24f7ffe918:   00007f24f7ffe970 00007f24f0002e40
+0x00007f24f7ffe928:   00000000d8b88350 00007f24f7ffe930
+0x00007f24f7ffe938:   00007f2568d7a1d4 00007f24f7ffe9b8
+0x00007f24f7ffe948:   00007f2568da3428 0000000000000000
+0x00007f24f7ffe958:   00007f2568d7a310 00007f24f7ffe910
+0x00007f24f7ffe968:   00007f24f7ffe9b0 00007f24f7ffea00
+0x00007f24f7ffe978:   00007f2555007ffd 0000000000000000
+0x00007f24f7ffe988:   00000000d9780ce8 0000000000000000
+0x00007f24f7ffe998:   0000000000000000 0000000000000000
+0x00007f24f7ffe9a8:   00000000d8b88350 0000000000000000
+0x00007f24f7ffe9b8:   00000000d8a3e6b0 00007f24f7ffe9c0
+0x00007f24f7ffe9c8:   00007f2568d7a015 00007f24f7ffea10
+0x00007f24f7ffe9d8:   00007f2568da3428 0000000000000000
+0x00007f24f7ffe9e8:   00007f2568d7a020 00007f24f7ffe9b0
+0x00007f24f7ffe9f8:   00007f24f7ffea10 00007f24f7ffea58
+0x00007f24f7ffea08:   00007f2555008042 00000000d8a3e6b0 
+
+Instructions: (pc=0x00007f25550693fa)
+0x00007f25550693da:   00 00 00 00 00 00 44 8b 15 ed 84 d8 17 4c 8b ce
+0x00007f25550693ea:   41 f6 c2 01 0f 85 2e 00 00 00 4d 33 ca 4d 33 ca
+0x00007f25550693fa:   4d 8b 09 4c 8b da 49 c1 eb 02 4b 8b 04 19 49 bb
+0x00007f255506940a:   d4 18 df 6c 25 7f 00 00 4c 33 d8 4c 33 d8 45 3b 
+
+Register to memory mapping:
+
+RAX=0x00007f256cdc4e80: <offset 0xee8e80> in /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so at 0x00007f256bedc000
+RBX=0x00007f25643d59e0 is an unknown value
+RCX=0x0000000000000000 is an unknown value
+RDX=0x0000000000000042 is an unknown value
+RSP=0x00007f24f7ffe818 is pointing into the stack for thread: 0x00007f25643d5800
+RBP=0x00007f24f7ffe840 is pointing into the stack for thread: 0x00007f25643d5800
+RSI=0x0000000000000000 is an unknown value
+RDI=0x00007f25643d59e0 is an unknown value
+R8 =0x00000000000001f4 is an unknown value
+R9 =0x0000000000000000 is an unknown value
+R10=0x0000000000000014 is an unknown value
+R11=0x00007f256c82f920: <offset 0x953920> in /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so at 0x00007f256bedc000
+R12=0x00007f24ec008d40 is an unknown value
+R13=0x0000000000000000 is an unknown value
+R14=0x00007f2536bfab00: <offset 0x258b00> in /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libawt_xawt.so at 0x00007f25369a2000
+R15=0x00007f25643d5800 is a thread
+
+
+Stack: [0x00007f24f7eff000,0x00007f24f8000000],  sp=0x00007f24f7ffe818,  free space=1022k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+v  ~BufferBlob::jni_fast_GetLongField
+C  [libX11.so.6+0x643c0]  _XimServerDestroy+0x70
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  sun.awt.X11.XlibWrapper.XFilterEvent(JJ)Z+0
+j  sun.awt.X11.XToolkit.run(Z)V+300
+j  sun.awt.X11.XToolkit.run()V+5
+j  java.lang.Thread.run()V+11
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x00007f2518004000 JavaThread "SIGHUP handler" daemon [_thread_blocked, id=3155, stack(0x00007f24e6860000,0x00007f24e6961000)]
+  0x00007f2518002000 JavaThread "SIGTERM handler" daemon [_thread_blocked, id=3154, stack(0x00007f24e6961000,0x00007f24e6a62000)]
+  0x00007f2504005000 JavaThread "NativeWindowFactory_ShutdownHook" [_thread_blocked, id=3151, stack(0x00007f24e6a62000,0x00007f24e6b63000)]
+  0x00007f2504003800 JavaThread "XToolkt-Shutdown-Thread" [_thread_blocked, id=3146, stack(0x00007f24e6b63000,0x00007f24e6c64000)]
+  0x00007f2518001000 JavaThread "SIGTERM handler" daemon [_thread_blocked, id=3144, stack(0x00007f24e6c64000,0x00007f24e6d65000)]
+  0x00007f256400b000 JavaThread "DestroyJavaVM" [_thread_blocked, id=2990, stack(0x00007f256db13000,0x00007f256dc14000)]
+  0x00007f2564477000 JavaThread "main-SharedResourceRunner" daemon [_thread_in_native, id=3024, stack(0x00007f2534fdd000,0x00007f25350de000)]
+  0x00007f25643ea800 JavaThread "AWT-EventQueue-0" [_thread_blocked, id=3023, stack(0x00007f24f74f3000,0x00007f24f75f4000)]
+  0x00007f25643e9000 JavaThread "AWT-Shutdown" [_thread_blocked, id=3022, stack(0x00007f24f75f4000,0x00007f24f76f5000)]
+=>0x00007f25643d5800 JavaThread "AWT-XAWT" daemon [_thread_in_native, id=3021, stack(0x00007f24f7eff000,0x00007f24f8000000)]
+  0x00007f25643b3800 JavaThread "Java2D Disposer" daemon [_thread_blocked, id=3020, stack(0x00007f25344ee000,0x00007f25345ef000)]
+  0x00007f25640cd800 JavaThread "Service Thread" daemon [_thread_blocked, id=3011, stack(0x00007f2536fcd000,0x00007f25370ce000)]
+  0x00007f25640c0800 JavaThread "C1 CompilerThread3" daemon [_thread_blocked, id=3010, stack(0x00007f25370ce000,0x00007f25371cf000)]
+  0x00007f25640bc000 JavaThread "C2 CompilerThread2" daemon [_thread_blocked, id=3009, stack(0x00007f25371cf000,0x00007f25372d0000)]
+  0x00007f25640ba000 JavaThread "C2 CompilerThread1" daemon [_thread_blocked, id=3008, stack(0x00007f25372d0000,0x00007f25373d1000)]
+  0x00007f25640b7800 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=3007, stack(0x00007f25373d1000,0x00007f25374d2000)]
+  0x00007f25640b5000 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=3006, stack(0x00007f25374d2000,0x00007f25375d3000)]
+  0x00007f256408d000 JavaThread "Finalizer" daemon [_thread_blocked, id=3004, stack(0x00007f25378f9000,0x00007f25379fa000)]
+  0x00007f2564088000 JavaThread "Reference Handler" daemon [_thread_blocked, id=3003, stack(0x00007f25379fa000,0x00007f2537afb000)]
+
+Other Threads:
+  0x00007f2564080800 VMThread [stack: 0x00007f2537afb000,0x00007f2537bfc000] [id=3002]
+  0x00007f25640d0000 WatcherThread [stack: 0x00007f2536ecc000,0x00007f2536fcd000] [id=3012]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap:
+ PSYoungGen      total 35840K, used 29244K [0x00000000d8000000, 0x00000000da800000, 0x0000000100000000)
+  eden space 30720K, 95% used [0x00000000d8000000,0x00000000d9c8f328,0x00000000d9e00000)
+  from space 5120K, 0% used [0x00000000da300000,0x00000000da300000,0x00000000da800000)
+  to   space 5120K, 0% used [0x00000000d9e00000,0x00000000d9e00000,0x00000000da300000)
+ ParOldGen       total 81920K, used 0K [0x0000000088000000, 0x000000008d000000, 0x00000000d8000000)
+  object space 81920K, 0% used [0x0000000088000000,0x0000000088000000,0x000000008d000000)
+ Metaspace       used 14945K, capacity 15144K, committed 15488K, reserved 1062912K
+  class space    used 1487K, capacity 1547K, committed 1664K, reserved 1048576K
+
+Card table byte_map: [0x00007f2569e29000,0x00007f256a1ea000] byte_map_base: 0x00007f25699e9000
+
+Marking Bits: (ParMarkBitMap*) 0x00007f256cdf0fc0
+ Begin Bits: [0x00007f254c400000, 0x00007f254e200000)
+ End Bits:   [0x00007f254e200000, 0x00007f2550000000)
+
+Polling page: 0x00007f256dc42000
+
+CodeCache: size=245760Kb used=3255Kb max_used=3255Kb free=242504Kb
+ bounds [0x00007f2555000000, 0x00007f2555330000, 0x00007f2564000000]
+ total_blobs=1671 nmethods=826 adapters=760
+ compilation: enabled
+
+Compilation events (10 events):
+Event: 4.220 Thread 0x00007f25640c0800  820       3       sun.awt.X11.XBaseWindow::dispatchToWindow (44 bytes)
+Event: 4.221 Thread 0x00007f25640c0800 nmethod 820 0x00007f2555329e90 code [0x00007f255532a120, 0x00007f255532b1c8]
+Event: 4.221 Thread 0x00007f25640c0800  821       3       java.util.concurrent.locks.LockSupport::park (23 bytes)
+Event: 4.221 Thread 0x00007f25640c0800 nmethod 821 0x00007f255532ba90 code [0x00007f255532bc20, 0x00007f255532bf48]
+Event: 4.229 Thread 0x00007f25640c0800  822       3       java.util.concurrent.locks.LockSupport::unpark (12 bytes)
+Event: 4.229 Thread 0x00007f25640c0800 nmethod 822 0x00007f255532c3d0 code [0x00007f255532c540, 0x00007f255532c768]
+Event: 6.712 Thread 0x00007f25640c0800  824       3       sun.awt.X11.XBaseWindow::dispatchEvent (298 bytes)
+Event: 6.714 Thread 0x00007f25640c0800 nmethod 824 0x00007f255532c810 code [0x00007f255532cb20, 0x00007f255532df48]
+Event: 76.624 Thread 0x00007f25640c0800  825       3       java.util.Arrays::copyOf (13 bytes)
+Event: 76.624 Thread 0x00007f25640c0800 nmethod 825 0x00007f255532e4d0 code [0x00007f255532e640, 0x00007f255532e848]
+
+GC Heap History (0 events):
+No events
+
+Deoptimization events (9 events):
+Event: 0.135 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f2555197eb8 method=java.lang.String.indexOf([CII[CIII)I @ 3
+Event: 0.146 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f255519fbb4 method=java.lang.String.replace(CC)Ljava/lang/String; @ 26
+Event: 0.186 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f25551d2ed4 method=java.lang.String.<init>([CII)V @ 18
+Event: 0.379 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f25552ac770 method=java.lang.reflect.AccessibleObject.setAccessible0(Ljava/lang/reflect/AccessibleObject;Z)V @ 4
+Event: 0.395 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f25552725cc method=java.lang.String.startsWith(Ljava/lang/String;I)Z @ 25
+Event: 0.395 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f25551d2350 method=java.lang.String.startsWith(Ljava/lang/String;I)Z @ 25
+Event: 0.398 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f255521bfc0 method=java.lang.AbstractStringBuilder.append(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder; @ 1
+Event: 0.399 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f25551f7dd8 method=java.lang.AbstractStringBuilder.append(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder; @ 1
+Event: 0.451 Thread 0x00007f256400b000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f255528c5b0 method=sun.net.www.ParseUtil.encodePath(Ljava/lang/String;Z)Ljava/lang/String; @ 109
+
+Internal exceptions (10 events):
+Event: 0.399 Thread 0x00007f256400b000 Implicit null exception at 0x00007f25551f7a75 to 0x00007f25551f7dc5
+Event: 0.431 Thread 0x00007f256400b000 Exception <a 'java/lang/reflect/InvocationTargetException'> (0x00000000d97582c0) thrown at [/build/openjdk-8-W1Ghxo/openjdk-8-8u91-b14/src/hotspot/src/share/vm/runtime/reflection.cpp, line 1092]
+Event: 0.440 Thread 0x00007f256400b000 Exception <a 'java/lang/reflect/InvocationTargetException'> (0x00000000d9772ad0) thrown at [/build/openjdk-8-W1Ghxo/openjdk-8-8u91-b14/src/hotspot/src/share/vm/runtime/reflection.cpp, line 1092]
+Event: 0.451 

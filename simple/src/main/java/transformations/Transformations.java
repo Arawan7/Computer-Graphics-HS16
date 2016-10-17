@@ -2,6 +2,7 @@ package transformations;
 
 import java.awt.Point;
 
+import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
@@ -31,20 +32,8 @@ public class Transformations {
 		
 		Matrix4f rotation = rotationFromTo( projectPointToVector3f(from, width, height), projectPointToVector3f(to, width, height) );
 		
-		Matrix4f translationToOrigin = new Matrix4f();
-		translationToOrigin.setIdentity();
-		translationToOrigin.setColumn(3, new Vector4f(-pivot.x,-pivot.y,-pivot.z,1));
-		
-		Matrix4f translationToCamera = (Matrix4f)translationToOrigin.clone();
-		translationToCamera.invert();
-		
-		// construct ((((T^-1)R)T)(transformation))
-		translationToCamera.mul(rotation);
-		translationToCamera.mul(translationToOrigin);
-		translationToCamera.mul(camera.getCameraMatrix());
-		
 		// apply result
-		camera.setCameraMatrix(translationToCamera);
+		camera.setCameraMatrix(getRotationWithPivot(camera.getCameraMatrix(), pivot, rotation));
 	}
 	
 	/**
@@ -213,30 +202,17 @@ public class Transformations {
 		transformation.setTranslation(relativeOrigin);
 	}
 	
-	
+	/**
+	 * Calculates the rotation matrix about given axis by given angle.
+	 * @param axis The axis to rotate about.
+	 * @param angle The angle to rotate
+	 * @return the rotation matrix about given axis by given angle.
+	 */
 	private static Matrix4f getRotationAboutAxis(Vector4f axis, float angle)
 	{		
 		Matrix4f rotation = new Matrix4f();
-		rotation.m00 = axis.x*axis.x+(float)(Math.cos(angle)*(1-axis.x*axis.x));
-		rotation.m01 = axis.x*axis.y*( 1-(float)(Math.cos(angle)) ) - axis.z*(float)(Math.sin(angle));
-		rotation.m02 = axis.x*axis.z*( 1-(float)(Math.cos(angle)) ) + axis.y*(float)(Math.sin(angle));
-		rotation.m03 = 0;
-		
-		rotation.m10 = axis.x*axis.y*( 1-(float)(Math.cos(angle)) ) + axis.z*(float)(Math.sin(angle));
-		rotation.m11 = axis.y*axis.y+(float)(Math.cos(angle)*(1-axis.y*axis.y));
-		rotation.m12 = axis.y*axis.z*( 1-(float)(Math.cos(angle)) ) - axis.x*(float)(Math.sin(angle));
-		rotation.m13 = 0;
-		
-		rotation.m20 = axis.x*axis.z*( 1-(float)(Math.cos(angle)) ) - axis.y*(float)(Math.sin(angle));
-		rotation.m21 = axis.y*axis.z*( 1-(float)(Math.cos(angle)) ) + axis.x*(float)(Math.sin(angle));
-		rotation.m22 = axis.z*axis.z+(float)(Math.cos(angle)*(1-axis.z*axis.z));
-		rotation.m23 = 0;
-		
-		rotation.m30 = 0;
-		rotation.m31 = 0;
-		rotation.m32 = 0;
-		rotation.m33 = 1;
-		
+		AxisAngle4f rot = new AxisAngle4f(axis.x,axis.y,axis.z,angle);
+		rotation.set(rot);
 		return rotation;
 	}
 	
@@ -248,6 +224,17 @@ public class Transformations {
 	 */
 	private static void rotateWithPivot(Shape model, Vector4f pivot, Matrix4f rotation)
 	{
+		model.setTransformation( getRotationWithPivot(model.getTransformation(), pivot, rotation) );
+	}
+	
+	/**
+	 * Calculates the rotation around given pivot by given rotation.
+	 * @param modelMatrix The matrix to apply the rotation to.
+	 * @param pivot The pivot to rotate about.
+	 * @param rotation The rotation to apply.
+	 */
+	private static Matrix4f getRotationWithPivot(Matrix4f modelMatrix, Vector4f pivot, Matrix4f rotation)
+	{
 		Matrix4f translationToOrigin = new Matrix4f();
 		translationToOrigin.setIdentity();
 		translationToOrigin.setColumn(3, new Vector4f(-pivot.x,-pivot.y,-pivot.z,1));
@@ -258,10 +245,9 @@ public class Transformations {
 		// construct ((((T^-1)R)T)(transformation))
 		translationToModel.mul(rotation);
 		translationToModel.mul(translationToOrigin);
-		translationToModel.mul(model.getTransformation());
+		translationToModel.mul(modelMatrix);
 		
-		// apply result
-		model.setTransformation(translationToModel);
+		return translationToModel;
 	}
 	
 	/**
@@ -276,6 +262,7 @@ public class Transformations {
 		axis.cross(from, to);
 		float angleBetweenVectors = -from.angle(to); // negate because we're moving the camera
 		Vector4f axis4f = new Vector4f(new float[]{axis.x,axis.y,axis.z,0});
+		
 		return getRotationAboutAxis(axis4f, angleBetweenVectors);
 
 	}
@@ -290,8 +277,9 @@ public class Transformations {
 	private static Vector3f projectPointToVector3f(Point mousePos, int width, int height)
 	{
 		// Scale bounds to [0,0] - [2,2]
-		double x = mousePos.x / (width/2);
-		double y = mousePos.y / (height/2);
+		
+		double x = mousePos.x * 0.5 / width;
+		double y = mousePos.y * 0.5 / height;
 		
 		// Translate 0,0 to the center
 		x = x - 1;
@@ -299,7 +287,7 @@ public class Transformations {
 		y = 1 - y;
 		
 		double z2 = 1 - x * x - y * y;
-		double z = z2 > 0 ? Math.sqrt(z2) : 0;
+		double z = z2 > 0 ? Math.sqrt(z2) : 0.1f;
 		Vector3f projectedPoint = new Vector3f((float)x, (float)y, (float)z);
 		projectedPoint.normalize();
 		
