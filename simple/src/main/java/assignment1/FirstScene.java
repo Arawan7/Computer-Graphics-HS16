@@ -5,7 +5,6 @@ import jrtr.glrenderer.*;
 import primitiveMeshes.Primitives;
 import transformations.Transformations;
 import userInput.SimpleKeyListener;
-import userInput.SimpleMouseMotionListener;
 
 import javax.swing.*;
 

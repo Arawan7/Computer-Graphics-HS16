@@ -5,22 +5,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import assignment2.VirtualTrackballScene;
+import assignment2.FlightSimulatorScene;
 import jrtr.Camera;
 import transformations.Transformations;
 
-/**
- * A mouse listener for the main window of this application. This can be
- * used to process mouse events.
- */
-public class SimpleMouseMotionListener implements MouseMotionListener, MouseListener
-{
+public class AirplaneMouseMotionListener implements MouseMotionListener, MouseListener {
 	private Point previousPos;
 	private final int screenWidth, screenHeight;
 	private Camera camera;
 	private boolean isInside = false;
 	
-	public SimpleMouseMotionListener(Camera camera, int screenWidth, int screenHeight)
+	public AirplaneMouseMotionListener(Camera camera, int screenWidth, int screenHeight)
 	{
 		previousPos = new Point();
 		this.camera = camera;
@@ -32,7 +27,7 @@ public class SimpleMouseMotionListener implements MouseMotionListener, MouseList
 	public void mousePressed(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON1 && isInside)
 		{
-			previousPos = new Point(e.getX(), e.getY());//e.getPoint();
+			previousPos = e.getPoint();
 		}
 	}
 	public void mouseReleased(MouseEvent e) {
@@ -53,9 +48,9 @@ public class SimpleMouseMotionListener implements MouseMotionListener, MouseList
 	public void mouseDragged(MouseEvent e) {
 		if(isInside)
 		{
-			Point toPosition = new Point(e.getX(), e.getY());//e.getPoint();
-			Transformations.virtualTrackball(camera, previousPos, toPosition, screenWidth, screenHeight);
-			VirtualTrackballScene.repaint();
+			Point toPosition = e.getPoint();
+			Transformations.virtualTrackball(FlightSimulatorScene.getAirplane(), previousPos, toPosition, screenWidth, screenHeight);
+			FlightSimulatorScene.repaint();
 			previousPos = toPosition;
 		}
 	}

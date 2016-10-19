@@ -12,8 +12,6 @@ public class FractalLandscapeScene {
 		private static RenderContext renderContext;
 		private static SimpleSceneManager sceneManager;
 		private static Shape fractalLandscape;
-		private static Shader normalShader;
-		private static Shader diffuseShader;
 
 		/**
 		 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -45,24 +43,13 @@ public class FractalLandscapeScene {
 				// Add the scene to the renderer
 				renderContext.setSceneManager(sceneManager);
 				
-				// Load some more shaders
-			    normalShader = renderContext.makeShader();
+				Shader lsShader = renderContext.makeShader();
 			    try {
-			    	normalShader.load("../jrtr/shaders/normal.vert", "../jrtr/shaders/normal.frag");
-			    } catch(Exception e) {
-			    	System.out.print("Problem with shader:\n");
-			    	System.out.print(e.getMessage());
+			        lsShader.load("../jrtr/shaders/landscape.vert", "../jrtr/shaders/landscape.frag");
+			    } catch (Exception e) {
+			        e.printStackTrace();
 			    }
-		
-			    diffuseShader = renderContext.makeShader();
-			    try {
-			    	diffuseShader.load("../jrtr/shaders/diffuse.vert", "../jrtr/shaders/diffuse.frag");
-			    } catch(Exception e) {
-			    	System.out.print("Problem with shader:\n");
-			    	System.out.print(e.getMessage());
-			    }
-			    
-			    // renderContext.useShader(normalShader);
+			    renderContext.useShader(lsShader);
 			}
 		}
 		

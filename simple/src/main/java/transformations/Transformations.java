@@ -18,8 +18,8 @@ import jrtr.Shape;
 public class Transformations {
 	
 	/**
-	 * Rotates the given camera relatively according to the rotation of moving from-point to to-point.
-	 * @param model The camera to rotate.
+	 * Rotates the given camera locally according to the rotation of moving from-point to to-point.
+	 * @param camera The camera to rotate.
 	 * @param from The from-mouse-position.
 	 * @param to The to-mouse-position.
 	 * @param width The screen's width.
@@ -29,11 +29,51 @@ public class Transformations {
 	{
 		Vector4f pivot = new Vector4f();
 		camera.getCameraMatrix().getColumn(3, pivot);
-		
+		virtualTrackball(camera, pivot, from, to, width, height);
+	}
+	
+	/**
+	 * Rotates the given camera relatively to the model, according to the rotation of moving from-point to to-point. The camera is always looking at the model.
+	 * @param camera The camera to rotate.
+	 * @param model The model to rotate around and look at.
+	 * @param from The from-mouse-position.
+	 * @param to The to-mouse-position.
+	 * @param width The screen's width.
+	 * @param height The screen's height.
+	 */
+	public static void virtualTrackball(Camera camera, Shape model, Point from, Point to, int width, int height)
+	{
+		Matrix4f modelTrans = new Matrix4f();
+		modelTrans.set(model.getTransformation());
+		Vector4f modelPivot = new Vector4f();
+		modelTrans.getColumn(3, modelPivot);
+		virtualTrackball(camera, modelPivot, from, to, width, height);
+
+//		Matrix4f cameraMatrix = new Matrix4f();
+//		cameraMatrix.set(camera.getCameraMatrix());
+//		Matrix4f rotation = getRotationWithPivot(cameraMatrix, modelPivot, rotationFromTo(projectPointToVector3f(from, width, height), projectPointToVector3f(to, width, height)) );
+//		Vector4f cOP = new Vector4f();
+//		rotation.getColumn(3, cOP);
+//		
+//		camera.setLookAtPoint(new Vector3f(modelPivot.x, modelPivot.y, modelPivot.z));
+//		camera.setCenterOfProjection(new Vector3f(cOP.x,cOP.y,cOP.z));
+	}
+	
+	/**
+	 * Rotates the given model locally, according to the rotation of moving from-point to to-point.
+	 * @param model The model to rotate.
+	 * @param from The from-mouse-position.
+	 * @param to The to-mouse-position.
+	 * @param width The screen's width.
+	 * @param height The screen's height.
+	 */
+	public static void virtualTrackball(Shape model, Point from, Point to, int width, int height)
+	{		
 		Matrix4f rotation = rotationFromTo( projectPointToVector3f(from, width, height), projectPointToVector3f(to, width, height) );
-		
+		Vector4f pivot = new Vector4f();
+		model.getTransformation().getColumn(3, pivot);
 		// apply result
-		camera.setCameraMatrix(getRotationWithPivot(camera.getCameraMatrix(), pivot, rotation));
+		model.setTransformation(getRotationWithPivot(model.getTransformation(), pivot, rotation));
 	}
 	
 	/**
@@ -46,6 +86,27 @@ public class Transformations {
 		Matrix4f transformation = model.getTransformation();
 		Matrix4f translation = new Matrix4f(new float[]{ scalingFactors.x,0,0,0, 0,scalingFactors.y,0,0, 0,0,scalingFactors.z,0, 0,0,0,1 });
 		transformation.mul(translation);
+	}
+	
+	/**
+	 * Rotates the given camera around pivot, according to the rotation of moving from-point to to-point.
+	 * @param camera The camera to rotate.
+	 * @param pivot The pivot to rotate around.
+	 * @param from The from-mouse-position.
+	 * @param to The to-mouse-position.
+	 * @param width The screen's width.
+	 * @param height The screen's height.
+	 */
+	private static void virtualTrackball(Camera camera, Vector4f pivot, Point from, Point to, int width, int height)
+	{		
+		Matrix4f rotation = rotationFromTo( projectPointToVector3f(from, width, height), projectPointToVector3f(to, width, height) );
+		
+		// apply result
+		camera.setCameraMatrix(getRotationWithPivot(camera.getCameraMatrix(), pivot, rotation));
+		
+//		Matrix4f rotationWithPivot = getRotationWithPivot(camera.getCameraMatrix(), pivot, rotation);
+//		camera.setCenterOfProjection(new Vector3f(rotationWithPivot.m03, rotationWithPivot.m13, rotationWithPivot.m23));
+//		camera.setLookAtPoint(new Vector3f(pivot.x, pivot.y, pivot.z));
 	}
 	
 	/**
@@ -142,6 +203,48 @@ public class Transformations {
 	}
 	
 	/**
+	 * Translates the camera relatively.
+	 * @param camera The camera to move.
+	 * @param direction The direction (0: forward, 1: backward, 2: left, 3: right, 4: up, 5: down)
+	 * @param distance How far to move the model.
+	 */
+	public static void translate(Camera camera, int direction, float distance)
+	{
+		assert direction >= 0;
+		assert direction < 6;
+		
+		Matrix4f transformation = camera.getCameraMatrix();
+		Vector4f axis = new Vector4f();
+		
+		switch(direction)
+		{
+			case 0:
+				transformation.getColumn(2, axis);
+				axis.scale(-1);
+				break;
+			case 1:
+				transformation.getColumn(2, axis);
+				break;
+			case 2:
+				transformation.getColumn(0, axis);
+				axis.scale(-1);
+				break;
+			case 3:
+				transformation.getColumn(0, axis);
+				break;
+			case 4:
+				transformation.getColumn(1, axis);
+				break;
+			case 5:
+				transformation.getColumn(1, axis);
+				axis.scale(-1);
+				break;
+		}
+		Vector3f relativeDirection = new Vector3f(axis.x, axis.y, axis.z);
+		translateMatrix(camera.getCameraMatrix(), relativeDirection, distance);
+	}
+	
+	/**
 	 * Translates the model relatively.
 	 * @param model The model to move.
 	 * @param direction The direction (0: forward, 1: backward, 2: left, 3: right, 4: up, 5: down)
@@ -193,13 +296,38 @@ public class Transformations {
 	{
 		assert direction.length() != 0;
 		
+		translateMatrix(model.getTransformation(), direction, distance);
+	}
+	
+	/**
+	 * Translates the camera in world space.
+	 * @param camera The camera to move.
+	 * @param direction The direction in world space to move towards. Mustn't have zero length.
+	 * @param distance How far to move the model.
+	 */
+	public static void translateGlobal(Camera camera, Vector3f direction, float distance)
+	{
+		assert direction.length() != 0;
+		
+		translateMatrix(camera.getCameraMatrix(), direction, distance);
+	}
+	
+	/**
+	 * Translates the matrix in world space.
+	 * @param matrix The matrix to apply the translation.
+	 * @param direction The direction in world space to move towards. Mustn't have zero length.
+	 * @param distance How far to move the model.
+	 */
+	private static void translateMatrix(Matrix4f modelMatrix, Vector3f direction, float distance){
+		assert direction.length() != 0;
+		
 		direction.normalize();
 		direction.scale(distance);
 		
-		Matrix4f transformation = model.getTransformation();
-		Vector3f relativeOrigin = new Vector3f(transformation.m03,transformation.m13,transformation.m23);
+		Vector3f relativeOrigin = new Vector3f(modelMatrix.m03,modelMatrix.m13,modelMatrix.m23);
 		relativeOrigin.add(new Vector3f(direction.x,direction.y,direction.z));
-		transformation.setTranslation(relativeOrigin);
+		modelMatrix.setTranslation(relativeOrigin);
+		//return modelMatrix;
 	}
 	
 	/**
@@ -231,7 +359,7 @@ public class Transformations {
 	 * Calculates the rotation around given pivot by given rotation.
 	 * @param modelMatrix The matrix to apply the rotation to.
 	 * @param pivot The pivot to rotate about.
-	 * @param rotation The rotation to apply.
+	 * @param rotation The applied rotation to set the transformation.
 	 */
 	private static Matrix4f getRotationWithPivot(Matrix4f modelMatrix, Vector4f pivot, Matrix4f rotation)
 	{
@@ -239,13 +367,16 @@ public class Transformations {
 		translationToOrigin.setIdentity();
 		translationToOrigin.setColumn(3, new Vector4f(-pivot.x,-pivot.y,-pivot.z,1));
 		
-		Matrix4f translationToModel = (Matrix4f)translationToOrigin.clone();
+		Matrix4f translationToModel = new Matrix4f();
+		translationToModel.set(translationToOrigin);
 		translationToModel.invert();
+		
+		Matrix4f modelMatrixClone = new Matrix4f(modelMatrix);
 		
 		// construct ((((T^-1)R)T)(transformation))
 		translationToModel.mul(rotation);
 		translationToModel.mul(translationToOrigin);
-		translationToModel.mul(modelMatrix);
+		translationToModel.mul(modelMatrixClone);
 		
 		return translationToModel;
 	}
@@ -260,7 +391,7 @@ public class Transformations {
 	{
 		Vector3f axis = new Vector3f();
 		axis.cross(from, to);
-		float angleBetweenVectors = -from.angle(to); // negate because we're moving the camera
+		float angleBetweenVectors = from.angle(to);
 		Vector4f axis4f = new Vector4f(new float[]{axis.x,axis.y,axis.z,0});
 		
 		return getRotationAboutAxis(axis4f, angleBetweenVectors);
@@ -287,7 +418,7 @@ public class Transformations {
 		y = 1 - y;
 		
 		double z2 = 1 - x * x - y * y;
-		double z = z2 > 0 ? Math.sqrt(z2) : 0.1f;
+		double z = z2 > 0 ? Math.sqrt(z2) : 0.001f;
 		Vector3f projectedPoint = new Vector3f((float)x, (float)y, (float)z);
 		projectedPoint.normalize();
 		

@@ -3,7 +3,10 @@ package assignment2;
 import jrtr.*;
 import jrtr.glrenderer.*;
 import primitiveMeshes.Primitives;
+import transformations.Transformations;
 import userInput.SimpleMouseMotionListener;
+
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -14,6 +17,8 @@ public class VirtualTrackballScene {
 	private static RenderContext renderContext;
 	private static SimpleSceneManager sceneManager;
 	private static Shape steeredModel;
+	private static Material material;
+	private static Shader diffuseShader;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -30,26 +35,62 @@ public class VirtualTrackballScene {
 		public void init(RenderContext r)
 		{
 			renderContext = r;
-			/*
+			
 			try {
-				steeredModel = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 1, renderContext));
+				steeredModel = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/airplane.obj", 5, renderContext));
 			} catch (IOException e) {
 				e.printStackTrace();
-			}*/
+			}
 			steeredModel = Primitives.makeHouse(r);
 			
 			sceneManager.getCamera().setUpVector(new Vector3f(0,1,0));
-			sceneManager.getCamera().setLookAtPoint(new Vector3f(-5,0,0));
-			sceneManager.getCamera().setCenterOfProjection(new Vector3f(40,0,0));
-//			sceneManager.getCamera().setCenterOfProjection(new Vector3f(-1,30,30));
+			sceneManager.getCamera().setLookAtPoint(new Vector3f(0,0,0));
+			sceneManager.getCamera().setCenterOfProjection(new Vector3f(0,0,50));
 			
-//			Transformations.translateGlobal(steeredModel, new Vector3f(-1, -0.3f, 0), 10);
-			sceneManager.addShape(steeredModel);
+			Transformations.translateGlobal(steeredModel, new Vector3f(-1, -0.3f, 0), 10);
 
+//			sceneManager.getCamera().setLookAtPoint(new Vector3f(steeredModel.getTransformation().m03,steeredModel.getTransformation().m13,steeredModel.getTransformation().m23));
+			
+			Shape xAxis = Primitives.makeCylinder(20, 5, 0.1f, r);
+			Shape yAxis = Primitives.makeCylinder(20, 5, 0.1f, r);
+			Shape zAxis = Primitives.makeCylinder(20, 5, 0.1f, r);
+			Transformations.translate(yAxis, 5, 2.5f);
+			Transformations.rotateRoll(xAxis, -90);
+			Transformations.translate(xAxis, 4, 2.5f);
+			Transformations.translate(xAxis, 3, 5f);
+			Transformations.rotateTilt(zAxis, 90);
+			Transformations.translate(zAxis, 4, 2.5f);
+			Transformations.translate(zAxis, 1, 5f);
+			
+			sceneManager.addShape(xAxis);
+			sceneManager.addShape(yAxis);
+			sceneManager.addShape(zAxis);
+			sceneManager.addShape(steeredModel);
+			
+			diffuseShader = renderContext.makeShader();
+		    try {
+		    	diffuseShader.load("../jrtr/shaders/diffuse.vert", "../jrtr/shaders/diffuse.frag");
+		    } catch(Exception e) {
+		    	System.out.print("Problem with shader:\n");
+		    	System.out.print(e.getMessage());
+		    }
+			// Make a material that can be used for shading
+ 			material = new Material();
+ 			material.shader = diffuseShader;
+ 			material.diffuseMap = renderContext.makeTexture();
+ 			try {
+ 				material.diffuseMap.load("../textures/plant.jpg");
+ 			} catch(Exception e) {				
+ 				System.out.print("Could not load texture.\n");
+ 				System.out.print(e.getMessage());
+ 			}
+// 			steeredModel.setMaterial(material);
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);
 		}
 	}
+	
+	public static Shape getSteeredModel() { return steeredModel;}
 	
 	public static void repaint()
 	{
