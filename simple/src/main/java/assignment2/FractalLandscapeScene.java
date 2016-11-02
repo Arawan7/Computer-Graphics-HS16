@@ -30,7 +30,7 @@ public class FractalLandscapeScene {
 				renderContext = r;
 				
 				// create the object
-				fractalLandscape = Primitives.makeFractalLandscape(6, 8f, r);
+				fractalLandscape = Primitives.makeFractalLandscape(6, 16f, r);
 				
 				// Make a scene manager and add the objects
 				sceneManager = new SimpleSceneManager();

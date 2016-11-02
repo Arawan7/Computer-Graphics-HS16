@@ -154,7 +154,7 @@ public class Primitives {
 		ArrayList<Point> newIterationPos = new ArrayList<Point>();
 		iterationPos.add(new Point(0,0));
 		
-		while(currentSize > 2){//arrayPosOfHalfSize > 1){
+		while(currentSize > 2){
 			for(Point point : iterationPos){
 				applySquare(heightValues, point.x, point.y, arrayPosOfHalfSize, currentSize, currentNoise);
 			}
@@ -315,6 +315,147 @@ public class Primitives {
 	{
 		assert resolution >= 3;
 		
+		float halfHeight = height/2;
+		
+		float[] vertices = new float[12*resolution + 6]; 	// 3 per vertex, n + 1 per disk, 2 disks
+		float[] normals = new float[12*resolution + 6];
+		
+		// set vertices and normals
+		// center points
+		// top center
+		vertices[12*resolution] = 0;
+		vertices[12*resolution + 1] = halfHeight;
+		vertices[12*resolution + 2] = 0;
+		
+		normals[12*resolution + 1] = 1;
+		
+		//bottom center
+		vertices[12*resolution + 3] = 0;
+		vertices[12*resolution + 4] = -halfHeight;
+		vertices[12*resolution + 5] = 0;
+		
+		normals[12*resolution + 4] = -1;
+		
+		// disk vertices
+		for (int k = 0; k < resolution; k++) {
+			// top disk
+			vertices[3*k] = radius * cos(k, resolution);
+			vertices[3*k+1] = halfHeight;
+			vertices[3*k+2] = radius * sin(k, resolution);
+			
+			normals[3*k + 1] = 1;
+			
+			// bottom disk
+			vertices[3*resolution + 3*k] = radius * cos(k, resolution);
+			vertices[3*resolution + 3*k + 1] = -halfHeight;
+			vertices[3*resolution + 3*k + 2] = radius * sin(k, resolution);
+			
+			normals[3*resolution + 3*k + 1] = -1;
+		}
+		
+		// side vertices
+		for (int k = 0; k < resolution; k++) {
+			// top disk
+			vertices[6*resolution+3*k] = radius * cos(k, resolution);
+			vertices[6*resolution+3*k+1] = halfHeight;
+			vertices[6*resolution+3*k + 2] = radius * sin(k, resolution);
+			
+			normals[6*resolution+3*k-1] = cos(k, resolution);
+			normals[6*resolution+3*k] = sin(k, resolution);
+			
+			// bottom disk
+			vertices[9*resolution + 3*k] = radius * cos(k, resolution);
+			vertices[9*resolution + 3*k + 1] = -halfHeight;
+			vertices[9*resolution + 3*k + 2] = radius * sin(k, resolution);
+			
+			normals[9*resolution + 3*k-1] = cos(k, resolution);
+			normals[9*resolution + 3*k] = sin(k, resolution);
+		}
+		
+		// set colors
+		float[] colors = new float[12*resolution + 6];
+		for (int i = 0; i < 6*resolution; i+=6) {
+			colors[i] = 1;
+			colors[i+1] = 1;
+			colors[i+2] = 1;
+			colors[6*resolution + i] = 1;
+			colors[6*resolution + i + 1] = 1;
+			colors[6*resolution + i + 2] = 1;
+		}
+		
+		// set indices
+		int[] indices = new int[12*resolution]; // 4n triangles, 3 per triangle
+		
+		for(int k = 0; k < resolution; k++) {
+			// top disk
+			indices[12*k] = 4*resolution;
+			indices[12*k+1] = k;
+			indices[12*k+2] = k + 1;
+			
+			// bottom disk
+			indices[12*k+3] = 4*resolution + 1;
+			indices[12*k+4] = resolution + k + 1;
+			indices[12*k+5] = resolution + k;
+			
+			// side
+			indices[12*k+6] = 2 * resolution + k + 1;
+			indices[12*k+7] = 2 * resolution + k;
+			indices[12*k+8] = 3 * resolution + k;
+			
+			indices[12*k+9] = 3 * resolution + k;
+			indices[12*k+10] = 3 * resolution + k + 1;
+			indices[12*k+11] = 2 * resolution + k + 1;
+		}
+		
+		// finishing
+		indices[12*(resolution-1)] = 4*resolution;
+		indices[12*(resolution-1)+1] = resolution - 1;
+		indices[12*(resolution-1)+2] = 0;
+		
+		indices[12*(resolution-1)+3] = 4*resolution + 1;
+		indices[12*(resolution-1)+4] = resolution;
+		indices[12*(resolution-1)+5] = 2*resolution - 1;
+		
+		indices[12*(resolution-1)+6] = 2*resolution;
+		indices[12*(resolution-1)+7] = 3*resolution - 1;
+		indices[12*(resolution-1)+8] = 4*resolution - 1;
+		
+		indices[12*(resolution-1)+9] = 4*resolution - 1;
+		indices[12*(resolution-1)+10] = 3*resolution;
+		indices[12*(resolution-1)+11] = 2*resolution;
+		
+		VertexData vertexData = renderContext.makeVertexData(4*resolution + 2);
+		vertexData.addElement(vertices, VertexData.Semantic.POSITION, 3);
+		vertexData.addElement(colors, VertexData.Semantic.COLOR, 3);
+		vertexData.addElement(normals, VertexData.Semantic.NORMAL, 3);
+		vertexData.addIndices(indices);
+		
+		Shape cylinder = new Shape(vertexData);
+		return cylinder;
+	}
+	
+	/**
+	 * Calculates sin(2pi/n * k)
+	 * @param k the k. point on the circle.
+	 * @param res the number of points on the circle
+	 * @return sin(2pi/n * k)
+	 */
+	private static final float sin(int k, int res) {
+		return ((Double)Math.sin((2*Math.PI/res)*k)).floatValue();
+	}
+
+	/**
+	 * Calculates cos(2pi/n * k)
+	 * @param k the k. point on the circle.
+	 * @param res the number of points on the circle
+	 * @return cos(2pi/n * k)
+	 */
+	private static final float cos(int k, int res) {
+		return ((Double)Math.cos((2*Math.PI/res)*k)).floatValue();
+	}
+	
+	public static final Shape makeCylinderWithoutNormalsAndUVs(int resolution, float height, float radius, RenderContext renderContext)
+	{
 		int numberOfVertices = 2+6+2*(resolution-3); // top and bottom center-vertices, at least three segments and each new segment adds 2 vertices
 		int indexOfTopCenter = numberOfVertices/2;
 		
