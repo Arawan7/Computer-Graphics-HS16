@@ -383,6 +383,35 @@ public class Primitives {
 			colors[6*resolution + i + 2] = 1;
 		}
 		
+		// Texture coordinates - use texture with ratio 10:1
+		float uv[] = new float[2*vertices.length/3]; // 2 per vertex (#vertices = vertices.length/3)
+		
+		// top disk center
+		uv[2*4*resolution] = 0.95f;
+		uv[2*4*resolution+1] = 0.5f;
+		
+		// bottom disk center
+		uv[2*(4*resolution + 1)] = 0.95f;
+		uv[2*(4*resolution + 1)+1] = 0.5f;
+		
+		for(int k = 0; k < resolution; k++) {
+			// top disk circle
+			uv[2*k] = 0.95f + cos(k, resolution)*0.05f;
+			uv[2*k+1] = 0.5f + sin(k, resolution)*0.5f;
+			
+			// bottom disk circle
+			uv[2*(resolution + k)] = 0.95f + cos(k, resolution)*0.05f;
+			uv[2*(resolution + k)+1] = 0.5f + sin(k, resolution)*0.5f;
+			
+			// top side vertices
+			uv[2*(2*resolution + k)] = 0;
+			uv[2*(2*resolution + k)+1] = (float)k/(resolution-1);
+			
+			// bottom side vertices
+			uv[2*(3*resolution + k)] = 0.9f;
+			uv[2*(3*resolution + k)+1] = (float)k/(resolution-1);
+		}
+		
 		// set indices
 		int[] indices = new int[12*resolution]; // 4n triangles, 3 per triangle
 		
@@ -428,6 +457,7 @@ public class Primitives {
 		vertexData.addElement(vertices, VertexData.Semantic.POSITION, 3);
 		vertexData.addElement(colors, VertexData.Semantic.COLOR, 3);
 		vertexData.addElement(normals, VertexData.Semantic.NORMAL, 3);
+		vertexData.addElement(uv, VertexData.Semantic.TEXCOORD, 2);
 		vertexData.addIndices(indices);
 		
 		Shape cylinder = new Shape(vertexData);
@@ -435,20 +465,20 @@ public class Primitives {
 	}
 	
 	/**
-	 * Calculates sin(2pi/n * k)
+	 * Calculates sin(2pi/res * k)
 	 * @param k the k. point on the circle.
 	 * @param res the number of points on the circle
-	 * @return sin(2pi/n * k)
+	 * @return sin(2pi/res * k)
 	 */
 	private static final float sin(int k, int res) {
 		return ((Double)Math.sin((2*Math.PI/res)*k)).floatValue();
 	}
 
 	/**
-	 * Calculates cos(2pi/n * k)
+	 * Calculates cos(2pi/res * k)
 	 * @param k the k. point on the circle.
 	 * @param res the number of points on the circle
-	 * @return cos(2pi/n * k)
+	 * @return cos(2pi/res * k)
 	 */
 	private static final float cos(int k, int res) {
 		return ((Double)Math.cos((2*Math.PI/res)*k)).floatValue();

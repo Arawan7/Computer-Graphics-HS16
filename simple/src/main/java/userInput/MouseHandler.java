@@ -12,7 +12,8 @@ import javax.vecmath.Point2f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import events.RepaintEvent;
+import assignment3.MathHelper;
+import assignment3.RasterizerScene;
 import jrtr.Camera;
 
 public class MouseHandler implements MouseListener, MouseMotionListener, MouseWheelListener
@@ -64,7 +65,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
 
 		//image 1
 		origin = new Vector3f(0.0f,0.0f,0.0f);
-		camPos=new Vector3f(0.0f,0.0f,40.0f);
+		camPos=new Vector3f(0.0f,0.0f,15.0f);
 		planeAxis = new Vector3f(1.0f,0.0f,0.0f);planeAxis.normalize();
 
 		//image 2
@@ -133,8 +134,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
 				break;
 		}
 		mousePos = new Point2f(e.getX(),e.getY());
-//		renderPanel.getCanvas().repaint();
-		RepaintEvent.triggerRepaint();
+		RasterizerScene.repaint();
 
 	}
 	
@@ -166,7 +166,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
 	 * @param e
 	 */
 	private void rotateCam(MouseEvent e){
-		Point2f diff = new Point2f(-((float)e.getX()-mousePos.x),(float)e.getY()-mousePos.y);
+		Point2f diff = new Point2f(((float)e.getX()-mousePos.x),(float)e.getY()-mousePos.y);
 		mousePos.x += diff.x; mousePos.y += diff.y;
 		updateCamRotation(diff);		
 	}

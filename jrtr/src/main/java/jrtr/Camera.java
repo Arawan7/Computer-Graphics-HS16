@@ -100,6 +100,13 @@ public class Camera {
 		this.upVector.set(upVector);
 		this.update();
 	}
+	
+	public void setUpCopLook(Vector3f upVec, Vector3f centerOfProj,Vector3f lookAtPoint) {
+		this.upVector.set(upVec);
+		this.centerOfProjection.set(centerOfProj);
+		this.lookAtPoint.set(lookAtPoint);
+		this.update();
+	}
 
 	private Vector3f x = new Vector3f(), y = new Vector3f(), z = new Vector3f(), temp = new Vector3f();
 	private void update() {

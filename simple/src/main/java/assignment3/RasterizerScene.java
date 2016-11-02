@@ -5,9 +5,9 @@ import jrtr.glrenderer.*;
 import jrtr.swrenderer.SWRenderPanel;
 import jrtr.swrenderer.SWTexture;
 import primitiveMeshes.Primitives;
+import userInput.MouseHandler;
 
 import javax.swing.*;
-import javax.vecmath.Vector3f;
 
 public class RasterizerScene {
 	private static RenderPanel renderPanel;
@@ -56,31 +56,33 @@ public class RasterizerScene {
 			material.shader = diffuseShader;
 			material.swTexture = (SWTexture) renderContext.makeTexture();
 			try {
-				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/plant.jpg");
+				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/wood.jpg");
+				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/cylinder.jpg");
+				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/sky.png");
+				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/stone.jpeg");
+				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/cylinderPixel.png");
 			} catch(Exception e) {				
 				System.out.print("Could not load texture.\n");
 				System.out.print(e.getMessage());
 			}
 			
 			// create the object
-//			cylinder = Primitives.makeCylinderWithoutNormalsAndUVs(20, 10, 1, r);
-			cylinder = Primitives.makeCylinder(20, 10, 1, r);
+			cylinder = Primitives.makeCylinder(30, 10, 1, r);
+//			cylinder = Primitives.makeCube(r);
 			
 			// Make a scene manager and add the objects
 			sceneManager = new SimpleSceneManager();
 			sceneManager.addShape(cylinder);
-			sceneManager.getCamera().setUpVector(new Vector3f(0,1,0));
-			
-			sceneManager.getCamera().setLookAtPoint(new Vector3f(0,0,0));
-			sceneManager.getCamera().setCenterOfProjection(new Vector3f(5,10,20));
-			
-//			sceneManager.getCamera().setLookAtPoint(new Vector3f(-5,0,0));
-//			sceneManager.getCamera().setCenterOfProjection(new Vector3f(-10,40,40));
 
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);
-			//cylinder.setMaterial(material);
+			cylinder.setMaterial(material);
 		}
+	}
+	
+	public static void repaint()
+	{
+		renderPanel.getCanvas().repaint();
 	}
 	
 	/**
@@ -99,7 +101,12 @@ public class RasterizerScene {
 		JFrame jframe = new JFrame("simple");
 		jframe.setSize(1000, 1000);
 		jframe.setLocationRelativeTo(null); // center of screen
-		jframe.getContentPane().add(renderPanel.getCanvas());// put the canvas into a JFrame window  	    	    
+		jframe.getContentPane().add(renderPanel.getCanvas());// put the canvas into a JFrame window
+		
+		MouseHandler mouseListener = new MouseHandler(sceneManager.getCamera());
+	    renderPanel.getCanvas().addMouseMotionListener(mouseListener);
+	    renderPanel.getCanvas().addMouseListener(mouseListener);
+	    renderPanel.getCanvas().addMouseWheelListener(mouseListener);
 	    
 	    jframe.setVisible(true); // show window
 	}
