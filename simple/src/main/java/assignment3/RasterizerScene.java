@@ -57,17 +57,18 @@ public class RasterizerScene {
 			material.swTexture = (SWTexture) renderContext.makeTexture();
 			try {
 				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/wood.jpg");
-				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/cylinder.jpg");
-				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/sky.png");
-				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/stone.jpeg");
-				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/cylinderPixel.png");
-			} catch(Exception e) {				
+//				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/cylinder.jpg");
+//				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/sky.png");
+//				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/stone.jpeg");
+//				material.swTexture.load("/home/simon/Documents/Computer-Graphics-HS16/textures/cylinderPixel.png");
+			} catch(Exception e) {
 				System.out.print("Could not load texture.\n");
 				System.out.print(e.getMessage());
 			}
 			
 			// create the object
 			cylinder = Primitives.makeCylinder(30, 10, 1, r);
+//			cylinder = Primitives.makeTorus(3, 3, 2, 2, r);
 //			cylinder = Primitives.makeCube(r);
 			
 			// Make a scene manager and add the objects

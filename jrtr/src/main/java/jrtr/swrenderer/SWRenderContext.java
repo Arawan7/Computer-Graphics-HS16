@@ -164,7 +164,7 @@ public class SWRenderContext implements RenderContext {
 		{
 			for(int y=0; y<zBuffer[0].length; y++)
 			{
-				zBuffer[x][y]=0;
+				zBuffer[x][y]=1;
 			}
 		}
 
@@ -334,7 +334,7 @@ public class SWRenderContext implements RenderContext {
 		if(alpha_w>0 && bita_w>0 && gamma_w>0){
 			double oneOverW = getOneOverW(new Vector3f(x,y,1), new Matrix3f(barCoordMatrix));
 			double z = zBuffer[x][y];
-			if(z < oneOverW)
+			if(z > oneOverW)
 			{
 				zBuffer[x][y]=oneOverW;
 				int color=0;

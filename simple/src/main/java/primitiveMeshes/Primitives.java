@@ -317,8 +317,8 @@ public class Primitives {
 		
 		float halfHeight = height/2;
 		
-		float[] vertices = new float[12*resolution + 6]; 	// 3 per vertex, n + 1 per disk, 2 disks
-		float[] normals = new float[12*resolution + 6];
+		float[] vertices = new float[12*resolution + 6 + 6]; 	// 3 per vertex, n + 1 per disk, 2 disks
+		float[] normals = new float[12*resolution + 6 + 6];
 		
 		// set vertices and normals
 		// center points
@@ -361,7 +361,7 @@ public class Primitives {
 			vertices[6*resolution+3*k + 2] = radius * sin(k, resolution);
 			
 			normals[6*resolution+3*k-1] = cos(k, resolution);
-			normals[6*resolution+3*k] = sin(k, resolution);
+			normals[6*resolution+3*k+1] = sin(k, resolution);
 			
 			// bottom disk
 			vertices[9*resolution + 3*k] = radius * cos(k, resolution);
@@ -369,12 +369,23 @@ public class Primitives {
 			vertices[9*resolution + 3*k + 2] = radius * sin(k, resolution);
 			
 			normals[9*resolution + 3*k-1] = cos(k, resolution);
-			normals[9*resolution + 3*k] = sin(k, resolution);
+			normals[9*resolution + 3*k+1] = sin(k, resolution);
 		}
 		
+		// texturing vertices
+		vertices[12*resolution + 6] = radius;
+		vertices[12*resolution + 7] = halfHeight;
+		vertices[12*resolution + 8] = 0;
+		normals[12*resolution + 6] = 1;
+		
+		vertices[12*resolution + 9] = radius;
+		vertices[12*resolution + 10] = -halfHeight;
+		vertices[12*resolution + 11] = 0;
+		normals[12*resolution + 9] = 1;
+		
 		// set colors
-		float[] colors = new float[12*resolution + 6];
-		for (int i = 0; i < 6*resolution; i+=6) {
+		float[] colors = new float[12*resolution + 6 + 6];
+		for (int i = 0; i < 6*resolution+1; i+=6) {
 			colors[i] = 1;
 			colors[i+1] = 1;
 			colors[i+2] = 1;
@@ -411,6 +422,13 @@ public class Primitives {
 			uv[2*(3*resolution + k)] = 0.9f;
 			uv[2*(3*resolution + k)+1] = (float)k/(resolution-1);
 		}
+		// top disk texturing vertex
+		uv[2*(4*resolution+2)] = 0;
+		uv[2*(4*resolution+2)+1] = 0;
+		
+		// bottom disk texturing vertex
+		uv[2*(4*resolution + 3)] = 0.9f;
+		uv[2*(4*resolution + 3)+1] = 0;
 		
 		// set indices
 		int[] indices = new int[12*resolution]; // 4n triangles, 3 per triangle
@@ -445,15 +463,15 @@ public class Primitives {
 		indices[12*(resolution-1)+4] = resolution;
 		indices[12*(resolution-1)+5] = 2*resolution - 1;
 		
-		indices[12*(resolution-1)+6] = 2*resolution;
-		indices[12*(resolution-1)+7] = 3*resolution - 1;
-		indices[12*(resolution-1)+8] = 4*resolution - 1;
+		indices[12*(resolution-1)+6] = 4*resolution+2; // 2*resolution; // top right
+		indices[12*(resolution-1)+7] = 3*resolution - 1; // top left
+		indices[12*(resolution-1)+8] = 4*resolution - 1; // bottom left
 		
-		indices[12*(resolution-1)+9] = 4*resolution - 1;
-		indices[12*(resolution-1)+10] = 3*resolution;
-		indices[12*(resolution-1)+11] = 2*resolution;
+		indices[12*(resolution-1)+9] = 4*resolution - 1; // bottom left
+		indices[12*(resolution-1)+10] = 4*resolution+3; // 3*resolution; // bottom right
+		indices[12*(resolution-1)+11] = 4*resolution+2; // 2*resolution; // top right
 		
-		VertexData vertexData = renderContext.makeVertexData(4*resolution + 2);
+		VertexData vertexData = renderContext.makeVertexData(4*resolution + 2 + 2);
 		vertexData.addElement(vertices, VertexData.Semantic.POSITION, 3);
 		vertexData.addElement(colors, VertexData.Semantic.COLOR, 3);
 		vertexData.addElement(normals, VertexData.Semantic.NORMAL, 3);

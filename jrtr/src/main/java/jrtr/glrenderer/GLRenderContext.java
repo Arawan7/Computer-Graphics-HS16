@@ -17,8 +17,6 @@ import jrtr.SceneManagerIterator;
 import jrtr.Shader;
 import jrtr.Texture;
 import jrtr.VertexData;
-import jrtr.VertexData.VertexElement;
-
 
 /**
  * Implements a {@link RenderContext} (a renderer) using OpenGL
@@ -307,8 +305,45 @@ public class GLRenderContext implements RenderContext {
 				gl.glUniform1i(id, 0);	// The variable in the shader needs to be set to the desired texture unit, i.e., 0
 			}
 			
+			// Activate the specular texture, if the material has one
+			if(m.specularMap != null) {
+				// OpenGL calls to activate the texture 
+				gl.glActiveTexture(GL3.GL_TEXTURE0);	// Work with texture unit 0
+				gl.glEnable(GL3.GL_TEXTURE_2D);
+				gl.glBindTexture(GL3.GL_TEXTURE_2D, ((GLTexture)m.specularMap).getId());
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
+				// We assume the texture in the shader is called "specular_map"
+				id = gl.glGetUniformLocation(activeShaderID, "specular_map");
+				gl.glUniform1i(id, 1);	// The variable in the shader needs to be set to the desired texture unit, i.e., 1
+			}
+			
+			// Pass diffuse reflection to shader, we assume the shader stores it in "diffuse_reflection"			
+			id = gl.glGetUniformLocation(activeShaderID, "diffuse_reflection");
+			if(id!=-1)
+				gl.glUniform3f(id, m.diffuse.x, m.diffuse.y, m.diffuse.z);		// Set the material's diffuse reflection
+			else
+				System.out.print("Could not get location of uniform variable diffuse_reflection\n");
+			
+			// Pass specular reflection to shader, we assume the shader stores it in "specular_reflection"
+			id = gl.glGetUniformLocation(activeShaderID, "specular_reflection");
+			if(id!=-1)
+				gl.glUniform3f(id, m.specular.x, m.specular.y, m.specular.z);		// Set the material's specular reflection
+			else
+				System.out.print("Could not get location of uniform variable specular_reflection\n");
+			
+			// Pass camera_pos to shader, we assume the shader stores it in "camera_pos"
+			id = gl.glGetUniformLocation(activeShaderID, "camera_pos");
+			if(id!=-1)
+			{
+				Vector3f cop = sceneManager.getCamera().getCenterOfProjection();
+				gl.glUniform3f(id, cop.x, cop.y, cop.z);
+			}
+			else
+				System.out.print("Could not get location of uniform variable specular_reflection\n");
+			
 			// Pass a default light source to shader
-			String lightString = "lightDirection[" + 0 + "]";			
+			String lightString = "light_direction[0]";			
 			id = gl.glGetUniformLocation(activeShaderID, lightString);
 			if(id!=-1)
 				gl.glUniform4f(id, 0, 0, 1, 0.f);		// Set light direction
@@ -322,28 +357,61 @@ public class GLRenderContext implements RenderContext {
 			Light l;
 			if(iter != null) {
 				nLights = 0;
-				while(iter.hasNext() && nLights<8)
+				int maxLights = 8; // make sure to set this equals to MAX_LIGHTS in diffusePointLights.vert
+				float[] lightColors = new float[3*maxLights];
+				float[] lightPositions = new float[3*maxLights];
+				float[] lightDirections = new float[4*maxLights];
+				
+				while(iter.hasNext() && nLights<maxLights)
 				{
 					l = iter.next(); 
 					
-					// Pass light direction to shader, we assume the shader stores it in an array "lightDirection[]"
-					lightString = "lightDirection[" + nLights + "]";			
-					id = gl.glGetUniformLocation(activeShaderID, lightString);
-					if(id!=-1)
-						gl.glUniform4f(id, l.direction.x, l.direction.y, l.direction.z, 0.f);		// Set light direction
-					else
-						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					lightDirections[4*nLights] = l.direction.x;
+					lightDirections[4*nLights+1] = l.direction.y;
+					lightDirections[4*nLights+2] = l.direction.z;
+					lightDirections[4*nLights+3] = 0f;
+					
+					lightColors[3*nLights] = l.diffuse.x;
+					lightColors[3*nLights+1] = l.diffuse.y;
+					lightColors[3*nLights+2] = l.diffuse.z;
+					
+					lightPositions[3*nLights] = l.position.x;
+					lightPositions[3*nLights+1] = l.position.y;
+					lightPositions[3*nLights+2] = l.position.z;
 					
 					nLights++;
 				}
+				
+				// Pass light direction to shader, we assume the shader stores it in an array "light_direction[]"
+				lightString = "light_direction";
+				id = gl.glGetUniformLocation(activeShaderID, lightString);
+				if(id!=-1)
+					gl.glUniform4fv(id, nLights, lightDirections, 0);		// Set light direction
+				else
+					System.out.print("Could not get location of uniform variable " + lightString + "\n");
+				
+				// Pass light colors to shader, we assume the shader stores it in an array "light_color[]"
+				lightString = "light_color";
+				id = gl.glGetUniformLocation(activeShaderID, lightString);
+				if(id!=-1)
+					gl.glUniform3fv(id, nLights, lightColors, 0);		// Set light colors
+				else
+					System.out.print("Could not get location of uniform variable " + lightString + "\n");
+				
+				// Pass light positions to shader, we assume the shader stores it in an array "light_position[]"
+				lightString = "light_position";			
+				id = gl.glGetUniformLocation(activeShaderID, lightString);
+				if(id!=-1)
+					gl.glUniform3fv(id, nLights, lightPositions, 0);		// Set light positions
+				else
+					System.out.print("Could not get location of uniform variable " + lightString + "\n");
 				
 				// Pass number of lights to shader, we assume this is in a variable "nLights" in the shader
 				id = gl.glGetUniformLocation(activeShaderID, "nLights");
 				if(id!=-1)
 					gl.glUniform1i(id, nLights);		// Set number of lightrs
-// Only for debugging				
-//				else
-//					System.out.print("Could not get location of uniform variable nLights\n");
+				else
+					System.out.print("Could not get location of uniform variable nLights\n");
 			}
 		}
 	}
