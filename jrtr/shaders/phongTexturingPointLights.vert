@@ -8,6 +8,7 @@
 // variants of glUniform*
 uniform mat4 projection;
 uniform mat4 modelview;
+uniform mat4 camera_matrix;
 uniform vec3 light_position[MAX_LIGHTS];
 uniform vec3 camera_pos;
 uniform vec4 light_direction[MAX_LIGHTS];
@@ -28,7 +29,7 @@ void setOutVars()
 {
 	for(int i=0; i<nLights; i++)
 	{
-		vec4 to_light = normalize(vec4(light_position[i],1) -  modelview * position);
+		vec4 to_light = normalize(camera_matrix * vec4(light_position[i],1) -  modelview * position);
 		vec4 normal_transformed = modelview * vec4(normal,0);
 		
 		diffuse_dots[i] = dot(normal_transformed, to_light);

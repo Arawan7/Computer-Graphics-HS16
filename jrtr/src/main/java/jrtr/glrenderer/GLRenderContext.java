@@ -342,6 +342,16 @@ public class GLRenderContext implements RenderContext {
 			else
 				System.out.print("Could not get location of uniform variable specular_reflection\n");
 			
+			// Pass camera matrix to shader, we assume the shader stores it in "camera_matrix"
+			id = gl.glGetUniformLocation(activeShaderID, "camera_matrix");
+			if(id!=-1)
+			{
+				Matrix4f cam = sceneManager.getCamera().getCameraMatrix();
+				gl.glUniformMatrix4fv(id, 1, false, transformationToFloat16(cam), 0);
+			}
+			else
+				System.out.print("Could not get location of uniform variable specular_reflection\n");
+			
 			// Pass a default light source to shader
 			String lightString = "light_direction[0]";			
 			id = gl.glGetUniformLocation(activeShaderID, lightString);

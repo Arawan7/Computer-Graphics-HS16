@@ -21,7 +21,7 @@ public class ShaderProgramming {
 	static Shader normalShader;
 	static Shader diffuseShader;
 	static Material materialCylinder, materialCylinder2, materialCylinder3;
-	static int exercise = 3;
+	static int exercise = 2;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -73,7 +73,7 @@ public class ShaderProgramming {
 				materialCylinder2 = new Material();
 				materialCylinder2.shader = diffuseShader;
 				materialCylinder2.diffuseMap = renderContext.makeTexture();
-				materialCylinder2.diffuse = new Vector3f(1f,0f,0f);
+				materialCylinder2.diffuse = new Vector3f(1f,0f,0.5f);
 				try {
 					materialCylinder2.diffuseMap.load("/home/simon/Documents/Computer-Graphics-HS16/textures/wood.jpg");
 				} catch(Exception e) {
@@ -112,14 +112,14 @@ public class ShaderProgramming {
 				// red light source
 				Light redLight = new Light();
 				redLight.type = Light.Type.POINT;
-				redLight.position = new Vector3f(0,0,0);
+				redLight.position = new Vector3f(0,6,0);
 				redLight.diffuse = new Vector3f(1f,0,0);
 				sceneManager.addLight(redLight);
 				
 				// blue light source
 				Light blueLight = new Light();
 				blueLight.type = Light.Type.POINT;
-				blueLight.position = new Vector3f(0,0,0);
+				blueLight.position = new Vector3f(0,-6,-10);
 				blueLight.diffuse = new Vector3f(0f,0,1f);
 				sceneManager.addLight(blueLight);
 		    } else if (exercise == 2)
@@ -203,13 +203,16 @@ public class ShaderProgramming {
 					System.out.print(e.getMessage());
 				}
 				
-				try {
+				/*try {
 					cylinder = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 3, r));
 					cylinder2 = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 3, r));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				};
+				};*/
+				cylinder = Primitives.makeCylinder(30, 10, 1, r);
+				cylinder2 = Primitives.makeCylinder(30, 10, 1, r);
+				
 				cylinder.setMaterial(materialCylinder);
 				cylinder2.setMaterial(materialCylinder2);
 				
