@@ -32,5 +32,6 @@ vec4 calculateColor()
 void main()
 {
 	// The built-in GLSL function "texture" performs the texture lookup
-	frag_shaded = calculateColor(); // * texture(myTexture, frag_texcoord);
+	// frag_shaded = calculateColor(); // * texture(myTexture, frag_texcoord);
+	frag_shaded = calculateColor() + texture(myTexture, frag_texcoord);
 }

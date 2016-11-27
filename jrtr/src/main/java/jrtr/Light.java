@@ -25,6 +25,22 @@ public class Light {
 		spotExponent = 0.f;
 		spotCutoff = 180.f;
 	}
+	
+	public Light clone(){
+		Light clonedLight = new Light();
+		clonedLight.direction = this.direction;
+		clonedLight.position = this.position;
+		clonedLight.type = this.type;
+		clonedLight.diffuse = this.diffuse;
+		clonedLight.ambient = this.ambient;
+		clonedLight.specular = this.specular;
+		clonedLight.attenuation = this.attenuation;
+		clonedLight.spotDirection = this.spotDirection;
+		clonedLight.spotExponent = this.spotExponent;
+		clonedLight.spotCutoff = this.spotCutoff;
+		
+		return clonedLight;
+	}
 
 	public Vector3f direction;
 	public Vector3f position;

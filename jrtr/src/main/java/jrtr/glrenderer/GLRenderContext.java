@@ -308,7 +308,7 @@ public class GLRenderContext implements RenderContext {
 			// Activate the specular texture, if the material has one
 			if(m.specularMap != null) {
 				// OpenGL calls to activate the texture 
-				gl.glActiveTexture(GL3.GL_TEXTURE0);	// Work with texture unit 0
+				gl.glActiveTexture(GL3.GL_TEXTURE1);	// Work with texture unit 1
 				gl.glEnable(GL3.GL_TEXTURE_2D);
 				gl.glBindTexture(GL3.GL_TEXTURE_2D, ((GLTexture)m.specularMap).getId());
 				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
@@ -374,7 +374,9 @@ public class GLRenderContext implements RenderContext {
 				
 				while(iter.hasNext() && nLights<maxLights)
 				{
-					l = iter.next(); 
+					l = iter.next();
+					if(l==null)
+						continue;
 					
 					lightDirections[4*nLights] = l.direction.x;
 					lightDirections[4*nLights+1] = l.direction.y;

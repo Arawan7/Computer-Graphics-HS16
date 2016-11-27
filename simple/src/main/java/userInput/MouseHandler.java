@@ -15,6 +15,7 @@ import javax.vecmath.Vector3f;
 import assignment3.MathHelper;
 import assignment3.RasterizerScene;
 import assignment4.ShaderProgramming;
+import assignment5.RobotScene;
 import jrtr.Camera;
 
 public class MouseHandler implements MouseListener, MouseMotionListener, MouseWheelListener
@@ -136,7 +137,8 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
 		}
 		mousePos = new Point2f(e.getX(),e.getY());
 //		RasterizerScene.repaint();
-		ShaderProgramming.repaint();
+//		ShaderProgramming.repaint();
+		RobotScene.repaint();
 
 	}
 	

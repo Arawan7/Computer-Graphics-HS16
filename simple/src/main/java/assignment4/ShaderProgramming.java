@@ -137,7 +137,7 @@ public class ShaderProgramming {
 				materialCylinder.shader = diffuseShader;
 				materialCylinder.diffuseMap = renderContext.makeTexture();
 				materialCylinder.diffuse = new Vector3f(1f,1f,1f);
-				materialCylinder.specular = new Vector3f(0f,0f,0f);
+				materialCylinder.specular = new Vector3f(0.5f,0.5f,0.5f);
 				materialCylinder.shininess = 100f;
 				
 				try {
@@ -203,13 +203,13 @@ public class ShaderProgramming {
 					System.out.print(e.getMessage());
 				}
 				
-				/*try {
-					cylinder = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 3, r));
-					cylinder2 = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 3, r));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				};*/
+//				try {
+//					cylinder = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 3, r));
+//					cylinder2 = new Shape(ObjReader.read("/home/simon/Documents/Computer-Graphics-HS16/obj/teapot.obj", 3, r));
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				};
 				cylinder = Primitives.makeCylinder(30, 10, 1, r);
 				cylinder2 = Primitives.makeCylinder(30, 10, 1, r);
 				
