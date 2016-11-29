@@ -8,6 +8,7 @@ import transformations.Transformations;
 import userInput.MouseHandler;
 import userInput.RobotAnimationKeyListener;
 
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,7 +24,10 @@ public class RobotScene {
 	private static int currentAnimationExecutionsPerSecond, animationExecutionsPerSecond, fps;
 	private static boolean paused;
 	static Shader diffuseShader;
-	static Material materialLowerArm;
+	static Material materialWood;
+	static boolean textured = false;
+	static boolean withRobot = true;
+	static boolean withCubes = true;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -43,23 +47,26 @@ public class RobotScene {
 			
 			diffuseShader = renderContext.makeShader();
 		    try {
-		    	diffuseShader.load("../jrtr/shaders/diffusePointLights.vert", "../jrtr/shaders/diffusePointLights.frag");
+	    		diffuseShader.load("../jrtr/shaders/diffusePointLights.vert", "../jrtr/shaders/diffusePointLights.frag");
 		    } catch(Exception e) {
 		    	System.out.print("Problem with shader:\n");
 		    	System.out.print(e.getMessage());
 		    }
-		    renderContext.useShader(diffuseShader);
+		    if(textured)
+		    	renderContext.useShader(diffuseShader);
 			
-		    materialLowerArm = new Material();
-			materialLowerArm.shader = diffuseShader;
-			materialLowerArm.diffuseMap = renderContext.makeTexture();
-			materialLowerArm.diffuse = new Vector3f(1f,1f,1f);
+		    materialWood = new Material();
+			materialWood.shader = diffuseShader;
+			materialWood.diffuseMap = renderContext.makeTexture();
+			materialWood.diffuse = new Vector3f(1f,1f,1f);
 			try {
-				materialLowerArm.diffuseMap.load("/home/simon/Documents/Computer-Graphics-HS16/textures/wood.jpg");
+				materialWood.diffuseMap.load("/home/simon/Documents/Computer-Graphics-HS16/textures/wood.jpg");
 			} catch(Exception e) {
 				System.out.print("Could not load texture.\n");
 				System.out.print(e.getMessage());
 			}
+			
+			TransformGroup rootNode = new TransformGroup(new Vector3f(0,0,0));
 			
 		/* Robot construction */
 			TransformGroup robotHeadTrafo, robotUpperArmLeftJointTrafo, robotUpperArmLeftTrafo, robotLowerArmLeftJointTrafo, robotLowerArmLeftTrafo,
@@ -95,7 +102,8 @@ public class RobotScene {
 			robotBigJointS = Primitives.makeTorus(30, 30, 0f, 0.45f, r);
 			robotHeadS = Primitives.makeTorus(30, 30, 0.5f, 0.4f, r);
 			
-			robotLowerArmS.setMaterial(materialLowerArm);
+			if(textured && withRobot)
+				robotLowerArmS.setMaterial(materialWood);
 			
 			robotBodySN = new ShapeNode(robotBodyS);
 			robotHeadSN = new ShapeNode(robotHeadS);
@@ -141,11 +149,32 @@ public class RobotScene {
 			robotTrafo = new TransformGroup(new Vector3f(5,0,0), new Node[]{robotHeadTrafo, robotUpperArmLeftJointTrafo, robotUpperArmRightJointTrafo,
 					robotUpperLegLeftJointTrafo, robotUpperLegRightJointTrafo, robotBodySN});
 			
+			if(withRobot)
+				rootNode.addNode(robotTrafo);
 		/* Robot construction END */
 			
+		/* culling objects construction */
+			Shape cube0S = Primitives.makeCube(r);
+			if(textured)
+				cube0S.setMaterial(materialWood);
+			int dim = 120;
+			TransformGroup[][] cubesTrafo = new TransformGroup[dim][dim];
+			ShapeNode[][] cubesSN = new ShapeNode[dim][dim];	
+			
+			if(withCubes){
+				for(int i=0; i<dim; i++)
+					for(int j=0; j<dim; j++){
+						cubesSN[i][j] = new ShapeNode(cube0S);
+						cubesTrafo[i][j] = new TransformGroup(new Vector3f(3*(i-dim/2), -6.5f, 3*(j-dim/2)), new Node[]{cubesSN[i][j]});
+						rootNode.addNode(cubesTrafo[i][j]);
+					}
+			}
+			
+		/* culling objects construction end */
+			
 			// add the graph of the robot to the graph scene manager
-			sceneManager.setRootNode(robotTrafo);
-
+			sceneManager.setRootNode(rootNode);
+			
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);
 		    

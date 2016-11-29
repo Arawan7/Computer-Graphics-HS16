@@ -3,6 +3,7 @@ package jrtr;
 import java.util.Stack;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector4f;
 
 import java.util.Iterator;
 
@@ -11,11 +12,19 @@ public class GraphSceneManager implements SceneManagerInterface {
 	private Camera camera;
 	private Frustum frustum;
 	private Node root;
+	private Vector4f[] planeNormals;
+	private float[] d;
 	
 	public GraphSceneManager()
 	{
 		camera = new Camera();
 		frustum = new Frustum();
+		d = new float[6];
+		planeNormals = new Vector4f[]{new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f()};
+		Matrix4f viewProjMat = new Matrix4f(frustum.getProjectionMatrix());
+		viewProjMat.invert();
+		viewProjMat.transpose();
+		createViewFrustumFromMatrix(viewProjMat);
 	}
 	
 	public Camera getCamera()
@@ -87,7 +96,12 @@ public class GraphSceneManager implements SceneManagerInterface {
 				else // if stack ended with a non ShapeNode, break
 					break;
 			}
-			return new RenderItem((Shape)element.get3dObject(), (Matrix4f)parentTransf.clone());
+			Matrix4f objToWorld = (Matrix4f)parentTransf.clone();
+			Matrix4f objToCam = new Matrix4f(camera.getCameraMatrix());
+			objToCam.mul(objToWorld);
+//			objToCam = objToWorld;
+			return new RenderItem(((ShapeNode)element).sphereIsInFrustum(planeNormals, d, objToCam) ? (Shape)element.get3dObject() : null, objToWorld);
+//			return new RenderItem((Shape)element.get3dObject(), (Matrix4f)parentTransf.clone());
 		}
 	}
 	
@@ -141,4 +155,56 @@ public class GraphSceneManager implements SceneManagerInterface {
 			return light;
 		}
 	}
+	
+	// calculate the view frustum from the view-projection matrix
+	// (projection-matrix -> view-space; view-projection-matrix -> world-space etc...)
+	private void createViewFrustumFromMatrix(Matrix4f viewToCameraSpaceProjMat)
+	{
+		
+		
+	    // left
+	    planeNormals[0].x = viewToCameraSpaceProjMat.m03 + viewToCameraSpaceProjMat.m00;
+	    planeNormals[0].y = viewToCameraSpaceProjMat.m13 + viewToCameraSpaceProjMat.m10;
+	    planeNormals[0].z = viewToCameraSpaceProjMat.m23 + viewToCameraSpaceProjMat.m20;
+	    d[0]        	  = viewToCameraSpaceProjMat.m33 + viewToCameraSpaceProjMat.m30;
+	    
+	    // right
+	    planeNormals[1].x = viewToCameraSpaceProjMat.m03 - viewToCameraSpaceProjMat.m00;
+	    planeNormals[1].y = viewToCameraSpaceProjMat.m13 - viewToCameraSpaceProjMat.m10;
+	    planeNormals[1].z = viewToCameraSpaceProjMat.m23 - viewToCameraSpaceProjMat.m20;
+	    d[1]       	   	  = viewToCameraSpaceProjMat.m33 - viewToCameraSpaceProjMat.m30;
+	    
+	    // bottom
+	    planeNormals[2].x = viewToCameraSpaceProjMat.m03 + viewToCameraSpaceProjMat.m01;
+	    planeNormals[2].y = viewToCameraSpaceProjMat.m13 + viewToCameraSpaceProjMat.m11;
+	    planeNormals[2].z = viewToCameraSpaceProjMat.m23 + viewToCameraSpaceProjMat.m21;
+	    d[2]        	  = viewToCameraSpaceProjMat.m33 + viewToCameraSpaceProjMat.m31;
+	    
+	    // top
+	    planeNormals[3].x = viewToCameraSpaceProjMat.m03 - viewToCameraSpaceProjMat.m01;
+	    planeNormals[3].y = viewToCameraSpaceProjMat.m13 - viewToCameraSpaceProjMat.m11;
+	    planeNormals[3].z = viewToCameraSpaceProjMat.m23 - viewToCameraSpaceProjMat.m21;
+	    d[3]        	  = viewToCameraSpaceProjMat.m33 - viewToCameraSpaceProjMat.m31;
+	    
+	    // near
+	    planeNormals[4].x = viewToCameraSpaceProjMat.m03 + viewToCameraSpaceProjMat.m02;
+	    planeNormals[4].y = viewToCameraSpaceProjMat.m13 + viewToCameraSpaceProjMat.m12;
+	    planeNormals[4].z = viewToCameraSpaceProjMat.m23 + viewToCameraSpaceProjMat.m22;
+	    d[4]        	  = viewToCameraSpaceProjMat.m33 + viewToCameraSpaceProjMat.m32;
+	    
+	    // far
+	    planeNormals[5].x = viewToCameraSpaceProjMat.m03 - viewToCameraSpaceProjMat.m02;
+	    planeNormals[5].y = viewToCameraSpaceProjMat.m13 - viewToCameraSpaceProjMat.m12;
+	    planeNormals[5].z = viewToCameraSpaceProjMat.m23 - viewToCameraSpaceProjMat.m22;
+	    d[5]			  = viewToCameraSpaceProjMat.m33 - viewToCameraSpaceProjMat.m32;
+	    
+	    // normalize
+	    for(int i=0; i<6; i++)
+	    {
+	        float length = planeNormals[i].length();
+	        planeNormals[i].scale(1/length);
+	        d[i] 		/= length; 			// d also has to be divided by the length of the normal
+	    }
+	}
+	
 }

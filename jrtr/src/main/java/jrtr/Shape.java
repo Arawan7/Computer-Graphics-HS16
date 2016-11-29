@@ -1,5 +1,9 @@
 package jrtr;
+import java.util.ListIterator;
+
 import javax.vecmath.*;
+
+import jrtr.VertexData.Semantic;
 
 /**
  * Represents a 3D object. The shape references its geometry, 
@@ -11,6 +15,8 @@ public class Shape {
 	private Material material;
 	private VertexData vertexData;
 	private Matrix4f t;
+	private float boundingSphereRadius;
+	private Vector4f boundingSphereCenter;
 	
 	/**
 	 * Make a shape from {@link VertexData}. A shape contains the geometry 
@@ -27,8 +33,49 @@ public class Shape {
 		t.setIdentity();
 		
 		material = null;
+		computeBoundingSphere();
 	}
 	
+	private void computeBoundingSphere(){
+		ListIterator<VertexData.VertexElement> itr = vertexData.getElements()
+				.listIterator(0);
+		
+		int numberOfVertices = vertexData.getNumberOfVertices();
+		float[] verticesData = new float[3*numberOfVertices];
+		while (itr.hasNext()) {
+			VertexData.VertexElement e = itr.next();
+			if (e.getSemantic().equals(Semantic.POSITION))
+				verticesData = e.getData();
+		}
+		float centerX = 0f, centerY = 0f, centerZ = 0f;
+		for(int i=0; i<numberOfVertices; i++){
+			centerX += verticesData[3*i];
+			centerY += verticesData[3*i+1];
+			centerZ += verticesData[3*i+2];
+		}
+		centerX /= (float)numberOfVertices;
+		centerY /= (float)numberOfVertices;
+		centerZ /= (float)numberOfVertices;
+		
+		boundingSphereCenter = new Vector4f(centerX, centerY, centerZ, 1);
+		
+		float maxDist = 0f;
+		for(int i=0; i<numberOfVertices; i++){
+			Vector4f vertex = new Vector4f(verticesData[3*i], verticesData[3*i+1], verticesData[3*i+2], 1);
+			vertex.sub(boundingSphereCenter);
+			maxDist = vertex.length() > maxDist ? vertex.length() : maxDist;
+		}
+		boundingSphereRadius = maxDist;
+	}
+	
+	public float getBoundingSphereRadius() {
+		return boundingSphereRadius;
+	}
+
+	public Vector4f getBoundingSphereCenter() {
+		return boundingSphereCenter;
+	}
+
 	public VertexData getVertexData()
 	{
 		return vertexData;
