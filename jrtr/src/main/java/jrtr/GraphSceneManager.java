@@ -98,10 +98,10 @@ public class GraphSceneManager implements SceneManagerInterface {
 			}
 			Matrix4f objToWorld = (Matrix4f)parentTransf.clone();
 			Matrix4f objToCam = new Matrix4f(camera.getCameraMatrix());
+			objToCam.invert();
 			objToCam.mul(objToWorld);
 //			objToCam = objToWorld;
 			return new RenderItem(((ShapeNode)element).sphereIsInFrustum(planeNormals, d, objToCam) ? (Shape)element.get3dObject() : null, objToWorld);
-//			return new RenderItem((Shape)element.get3dObject(), (Matrix4f)parentTransf.clone());
 		}
 	}
 	

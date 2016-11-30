@@ -5,8 +5,7 @@ import java.awt.event.*;
 import assignment5.RobotScene;
 
 public class RobotAnimationKeyListener implements KeyListener {
-	private static final float DISTANCE = 0.5f;
-	private static final float ANGLE_IN_DEGREES = 10;
+	private static final float DISTANCE = 5f;
 	
 	public void keyPressed(KeyEvent e)
 	{
@@ -24,6 +23,20 @@ public class RobotAnimationKeyListener implements KeyListener {
 			}
 			case '-': {
 				RobotScene.decreaseAnimationSpeed();
+				break;
+			}
+			case 'a': {
+				RobotScene.moveCamera(-DISTANCE, 0);
+				break;
+			}
+			case 'd': {
+				RobotScene.moveCamera(DISTANCE, 0);
+				break;
+			}case 'w': {
+				RobotScene.moveCamera(0, DISTANCE);
+				break;
+			}case 's': {
+				RobotScene.moveCamera(0, -DISTANCE);
 				break;
 			}
 		}

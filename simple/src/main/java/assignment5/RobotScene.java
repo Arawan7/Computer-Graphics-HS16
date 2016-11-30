@@ -4,11 +4,9 @@ import jrtr.*;
 import jrtr.Light.Type;
 import jrtr.glrenderer.*;
 import primitiveMeshes.Primitives;
-import transformations.Transformations;
 import userInput.MouseHandler;
 import userInput.RobotAnimationKeyListener;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -157,7 +155,7 @@ public class RobotScene {
 			Shape cube0S = Primitives.makeCube(r);
 			if(textured)
 				cube0S.setMaterial(materialWood);
-			int dim = 120;
+			int dim = textured ? 8 : 150;
 			TransformGroup[][] cubesTrafo = new TransformGroup[dim][dim];
 			ShapeNode[][] cubesSN = new ShapeNode[dim][dim];	
 			
@@ -312,6 +310,15 @@ public class RobotScene {
 	public static void decreaseAnimationSpeed()
 	{
 		currentAnimationExecutionsPerSecond = currentAnimationExecutionsPerSecond - 1 > 1 ? currentAnimationExecutionsPerSecond - 1 : 1;
+	}
+	
+	public static void moveCamera(float x, float z){
+		Camera cam = sceneManager.getCamera();
+		cam.getCenterOfProjection().add(new Vector3f(x, 0, z));
+		cam.getLookAtPoint().add(new Vector3f(x, 0, z));
+		
+		cam.setCenterOfProjection(cam.getCenterOfProjection());
+		repaint();
 	}
 	
 	/**
