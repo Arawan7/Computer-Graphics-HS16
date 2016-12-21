@@ -3,7 +3,8 @@ package assignment5;
 import jrtr.*;
 import jrtr.Light.Type;
 import jrtr.glrenderer.*;
-import primitiveMeshes.Primitives;
+import meshes.Primitives;
+import transformations.Transformations;
 import userInput.MouseHandler;
 import userInput.RobotAnimationKeyListener;
 
@@ -24,8 +25,9 @@ public class RobotScene {
 	static Shader diffuseShader;
 	static Material materialWood;
 	static boolean textured = false;
-	static boolean withRobot = true;
+	static boolean withRobot = false;
 	static boolean withCubes = true;
+	static Shape cube0S;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -152,10 +154,10 @@ public class RobotScene {
 		/* Robot construction END */
 			
 		/* culling objects construction */
-			Shape cube0S = Primitives.makeCube(r);
+			cube0S = Primitives.makeCube(r);
 			if(textured)
 				cube0S.setMaterial(materialWood);
-			int dim = textured ? 8 : 150;
+			int dim = textured ? 8 : 300;
 			TransformGroup[][] cubesTrafo = new TransformGroup[dim][dim];
 			ShapeNode[][] cubesSN = new ShapeNode[dim][dim];	
 			
@@ -204,11 +206,16 @@ public class RobotScene {
 				if(counterToFireAnimation >= fps/currentAnimationExecutionsPerSecond)
 				{
 					robotAnimation();
+					rotateCube();
 					// Trigger redrawing of the render window
 					renderPanel.getCanvas().repaint(); 
 					counterToFireAnimation = 0;
 				}
 			}
+		}
+		
+		private void rotateCube(){
+			Transformations.rotatePan(cube0S, 2f);
 		}
 		
 		private void robotAnimation()

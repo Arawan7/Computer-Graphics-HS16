@@ -3,7 +3,7 @@ package assignment4;
 import jrtr.*;
 import jrtr.glrenderer.*;
 import jrtr.swrenderer.SWRenderPanel;
-import primitiveMeshes.Primitives;
+import meshes.Primitives;
 import transformations.Transformations;
 import userInput.MouseHandler;
 

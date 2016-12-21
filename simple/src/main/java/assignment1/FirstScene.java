@@ -2,7 +2,7 @@ package assignment1;
 
 import jrtr.*;
 import jrtr.glrenderer.*;
-import primitiveMeshes.Primitives;
+import meshes.Primitives;
 import transformations.Transformations;
 import userInput.SimpleKeyListener;
 

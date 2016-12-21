@@ -4,7 +4,7 @@ import jrtr.*;
 import jrtr.glrenderer.*;
 import jrtr.swrenderer.SWRenderPanel;
 import jrtr.swrenderer.SWTexture;
-import primitiveMeshes.Primitives;
+import meshes.Primitives;
 import userInput.MouseHandler;
 
 import javax.swing.*;

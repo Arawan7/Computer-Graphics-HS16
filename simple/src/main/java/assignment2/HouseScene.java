@@ -2,7 +2,7 @@ package assignment2;
 
 import jrtr.*;
 import jrtr.glrenderer.*;
-import primitiveMeshes.Primitives;
+import meshes.Primitives;
 
 import javax.swing.*;
 import javax.vecmath.Vector3f;

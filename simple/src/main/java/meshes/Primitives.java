@@ -1,4 +1,4 @@
-package primitiveMeshes;
+package meshes;
 
 import java.awt.Color;
 import java.awt.Point;
